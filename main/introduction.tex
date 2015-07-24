@@ -14,4 +14,5 @@ What about natively pushing call stack into Executing thread in order to preserv
 \item Uncoherence of execution stack. 
 \item corruption of the executing Thread's stack. As we can see with Thread pools implementations nowadays (as Java's ForkjoinPool), the programmer does not even control its asynchronous task is executed by a fresh Thread. What happens is : another programm asynchronously executes tasks submitted by the programmer. If this submission was to modify the executing thread's stack.
 \end{itemize}
-As naive solution, we can imagine, by some mean 
+As naive solution, we can imagine, by some mean to collect the exception tables and 
+Rather that automatizing everything and inferring a bad solution half times, the zone provides means for the programmer to know what he's doing and which effects he will archeive.
