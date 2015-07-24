@@ -2,4 +2,16 @@
 \chapter{Introduction}
 
 
-insert introduction here
+Who never faced the challenge of debugging an asynchronous programm ? And even the somewhat simpler task of following its execution and understanding its dependencies is neither easy.
+The main reason of this difficulty is the intrinsic non-determinism. That's precisely what we want when using asynchronous constructs. The real point that make it hard to deal with is the rupture of the control flow across asynchronous calls.
+First, let me give an insight about what I mean by ``control flow'' and how it is lost across asynchronous calls. Indeed, it is a really intuitive concept, but you may try the exercise~: giving a clear definintion that one can work it is not that easy.
+
+Now consider the second point, the lost of context. In a pure programmatically sense, the ``context'' of an execution statement is the scope of that context. 
+
+
+What about natively pushing call stack into Executing thread in order to preserve handling context ? This is not a good solution for many reasons.
+\begin{itemize}
+\item Uncoherence of execution stack. 
+\item corruption of the executing Thread's stack. As we can see with Thread pools implementations nowadays (as Java's ForkjoinPool), the programmer does not even control its asynchronous task is executed by a fresh Thread. What happens is : another programm asynchronously executes tasks submitted by the programmer. If this submission was to modify the executing thread's stack.
+\end{itemize}
+As naive solution, we can imagine, by some mean 
