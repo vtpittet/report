@@ -1,0 +1,39 @@
+
+\chapter{Zone Prototype}
+
+Realizing a Zone prototype is the first (and crucial) development step. It allows both to understand concepts, usecases, .. , and grab main challenges, needs and difficulties to reach objectives.
+
+\section{Representation, Integration}
+
+No discussion about features, operation before tackling representation and integration concerns.
+
+\begin{itemize}
+\item We want the integration to be as transparent to the user as possible. Do not add tones of boilerplate
+\item Threading model : Java does not allow context switch. One thread will never preemptiveley switch task execution. (Every switch is controlled by the programmer).
+\item profit from threading model : representation. Sure that one task is executed completely by the thread. One static context field assigned per thread could be updated at beginning and end of thread's task.
+\item problem from threading model : integration. Since Thread cannot control the task it executes, one framework can make a thread executing multiple tasks with different contexts (typical threadpool). Hence the integration take place on top (visible) of the framework, not below (invisible).
+\end{itemize}
+
+\section{Features}
+
+With representation and integration solution, the Zone is ready to support concrete functionalities.
+
+\begin{itemize}
+\item \zonejs and \zonedrt analysis shows up : Zone values, around hook api, hooks inheritance, asynchronous error handling, long stack traces, zone specification through $\lambda$s
+\item Zone values : immutability for thread safety
+\item Error handler : synchronous and asynchronous binding
+\item Around hooks : distinguish synchronous and asynchronous
+\item Long call stack : its own small world
+\end{itemize}
+
+\section{Limits}
+
+The long call stack exemple shows weakness of a naive implementation when needing changes. This comes with even more problematic limitations.
+
+\begin{itemize}
+\item Support more than simple runnables : for now we did not discuss about the kind of task that were executed inside the Zone. Most simple one is Runnable : stand-alone, no expected outcome. Extend to general concept of task.
+\item Asynchronous error handling : contextual and multiplicity ambiguity. (maybe multiplicity later, speaking of tokens)
+\item LCS Many complications for a 'single' feature.
+\item What about ASD ? - redundancy
+\item finally if one did just care about zone values ? All this call to a general composable abstraction that provides essential primitives to compose and implement specific features.
+\end{itemize}

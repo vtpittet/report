@@ -16,3 +16,34 @@ What about natively pushing call stack into Executing thread in order to preserv
 \end{itemize}
 As naive solution, we can imagine, by some mean to collect the exception tables and 
 Rather that automatizing everything and inferring a bad solution half times, the zone provides means for the programmer to know what he's doing and which effects he will archeive.
+
+This work presents my analysis and development process to build the final solution. A first pragmatic approach (Zone prototype) allowed me to grab and solve essential integration concerns : How to represent the Zone and how to bind zoned code to it with minimal effort of the user.
+
+Then, naively adding properties implementing whished hooks/solution elements allowed me to quickly grasp the interest and power of the Zone, but also to face rough limitations preventing extension and composability of the Zone. As an answer to this, I developped a model (Zone model) that describes the core functions of the Zone which can be used to represent specific features. (Zone implementation)
+
+This model appears to be an innovative tool that drives you to think about asynchronous programs in a way you did not know before. We will see (Future work) potential extentions and refinements to both the model and the implementation to make the Zone an even more powerful and easy-to-use tool.
+
+\section{Objectives}
+
+\begin{itemize}
+\item Propose solution to stated problems
+\item Target the Java runtime environment
+\item Build an useable tool providing asynchronous execution context in a similar fasion to Zones in \zonejs and \zonedrt.
+\item Targeted features include asynchronous error handling, long stack traces and generation of asynchronous sequence diagram.
+\item The tool should be easily useable and require few, if no adaptation in the user code. I will call this the integration concerns.
+\end{itemize}
+
+\section{A Small Tour of the Asynchronous World}
+
+Before diving in the real matter, let me add a little context to understand on which support we are going to work. Here, I present common existing ways to handle and implement asynchronicity in the Java, javascript and Dart world.
+\begin{itemize}
+\item Thread : OS preemption or VM preemption based on locking mechanisms.
+\item Thread pools : popular java framework to optimize threaded programms.
+\item Callbacks : non-preemptive concurrency. Manual execution unit yield using callbacks (js, dart)
+\item Callbacks with threadpools : scalable event loop (\vertx)
+\item Promises or CompletableFutures (in Java) : late-binding callbacks
+\end{itemize}
+
+In Java, unlike dart and javascript there is no unique imposed asynchronous model but lots of frameworks built on top of natives threads.
+
+Hence, the Zone developped in this project aim to integrate with any approach. The tool must stay consistent regardless of the asynchronous framework.

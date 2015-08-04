@@ -1,5 +1,7 @@
 \documentclass[12pt,a4paper]{report}
 
+\usepackage{amsmath}
+
 \usepackage{graphicx}
 \graphicspath{{./images/}}
 
@@ -13,7 +15,7 @@
 \definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % javadoc
 
 \usepackage{listings} 
-\lstset{language=Java,
+\lstdefinestyle{eclipsejava}{language=Java,
 basicstyle=\ttfamily,
 keywordstyle=\color{javapurple}\bfseries,
 stringstyle=\color{javared},
@@ -22,8 +24,16 @@ morecomment=[s][\color{javadocblue}]{/**}{*/},
 tabsize=2,
 showspaces=false,
 showstringspaces=false}
+\lstset{style=eclipsejava}
+
+\renewcommand{\baselinestretch}{1.1}
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+
+\newcommand{\zonejs}{zone.js }
+\newcommand{\zonedrt}{dart:Zone }
+\newcommand{\vertx}{Vert.x }
+
 
 \begin{document}
 
@@ -34,6 +44,10 @@ showstringspaces=false}
 \tableofcontents
 
 \input{./main/introduction}
+\input{./main/zoneprototype}
+\input{./main/zonemodel}
+\input{./main/implementation}
+\input{./main/futurework}
 \input{./main/conclusion}
 
 
