@@ -1,7 +1,7 @@
 
 \chapter{Zone Prototype}
 
-Realizing a Zone prototype is the first (and crucial) development step. It allows both to understand concepts, usecases, .. , and grab main challenges, needs and difficulties to reach objectives.
+Realizing a Zone prototype is the first (and crucial) development step. It allows both to understand concepts, use cases, .. , and grab main challenges, needs and difficulties to reach objectives.
 
 \section{Representation, Integration}
 
@@ -9,9 +9,9 @@ No discussion about features, operation before tackling representation and integ
 
 \begin{itemize}
 \item We want the integration to be as transparent to the user as possible. Do not add tones of boilerplate
-\item Threading model : Java does not allow context switch. One thread will never preemptiveley switch task execution. (Every switch is controlled by the programmer).
+\item Threading model : Java does not allow context switch. One thread will never preemptively switch task execution. (Every switch is controlled by the programmer).
 \item profit from threading model : representation. Sure that one task is executed completely by the thread. One static context field assigned per thread could be updated at beginning and end of thread's task.
-\item problem from threading model : integration. Since Thread cannot control the task it executes, one framework can make a thread executing multiple tasks with different contexts (typical threadpool). Hence the integration take place on top (visible) of the framework, not below (invisible).
+\item problem from threading model : integration. Since Thread cannot control the task it executes, one framework can make a thread executing multiple tasks with different contexts (typical thread pool). Hence the integration take place on top (visible) of the framework, not below (invisible).
 \end{itemize}
 
 \section{Features}
@@ -28,10 +28,10 @@ With representation and integration solution, the Zone is ready to support concr
 
 \section{Limits}
 
-The long call stack exemple shows weakness of a naive implementation when needing changes. This comes with even more problematic limitations.
+The long call stack example shows weakness of a naive implementation when needing changes. This comes with even more problematic limitations.
 
 \begin{itemize}
-\item Support more than simple runnables : for now we did not discuss about the kind of task that were executed inside the Zone. Most simple one is Runnable : stand-alone, no expected outcome. Extend to general concept of task.
+\item Support more than simple Runnables : for now we did not discuss about the kind of task that were executed inside the Zone. Most simple one is Runnable : stand-alone, no expected outcome. Extend to general concept of task.
 \item Asynchronous error handling : contextual and multiplicity ambiguity. (maybe multiplicity later, speaking of tokens)
 \item LCS Many complications for a 'single' feature.
 \item What about ASD ? - redundancy

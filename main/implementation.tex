@@ -6,7 +6,7 @@ The aim of this chapter is to give you insight on the Zone architecture and get 
 
 \section{Idioms}
 
-Here is a small digressions about common used code patterns that may trouble a regular Java developper using the Zone.
+Here is a small digressions about common used code patterns that may trouble a regular Java developer using the Zone.
 
 \begin{itemize}
 \item $\lambda$s typing and creation (especially for hooks)
@@ -23,7 +23,7 @@ Here is a small digressions about common used code patterns that may trouble a r
   \item get around hooks (sync and async) method
   \item get value method
   \end{itemize}
-\item Use prebuilt zone (value zone, around zone, b-r-a zone, cross zone, error zone)
+\item Use embedded zone (value zone, around zone, b-r-a zone, cross zone, error zone)
 \item Build your own zone property (as in last point of application)
 \end{itemize}
 
@@ -35,7 +35,7 @@ As evoked in (some previous chapter), the Zone integrates on top of an asynchron
 Use an instrumented execution framework :
 \begin{itemize}
 \item Executor, ExecutorService, CompletableFuture (with limitations of replacing JRE classes by others : different packages/naming
-\item instrumented third part library, Vertx example.
+\item instrumented third part library, \vertx example.
 \end{itemize}
 
 Or instrument your own execution framework :
