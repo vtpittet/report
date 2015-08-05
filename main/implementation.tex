@@ -1,6 +1,46 @@
 
 \chapter{Zone your Java}
 
-Here we are going to speak about the zone implementation.
-The aime of this chapter is to give you insight on the Zone architecture and get you familiarized with its features, tips and tricks.
-You will find as well small digressions about common used code patterns that may trouble regular Java developper.
+This chapter will close the zone presentation with brief overview of the implementation and usage.
+The aim of this chapter is to give you insight on the Zone architecture and get you familiarized with its features, tips and tricks.
+
+\section{Idioms}
+
+Here is a small digressions about common used code patterns that may trouble a regular Java developper using the Zone.
+
+\begin{itemize}
+\item $\lambda$s typing and creation (especially for hooks)
+\item Key-typed-map and Heap pollution concerns
+\item The match function (use Option class for Zone values lookup)
+\end{itemize}
+
+\section{Make your Zone}
+
+\begin{itemize}
+\item Zone class extension - implement your hooks
+  \begin{itemize}
+  \item cross in - out method
+  \item get around hooks (sync and async) method
+  \item get value method
+  \end{itemize}
+\item Use prebuilt zone (value zone, around zone, b-r-a zone, cross zone, error zone)
+\item Build your own zone property (as in last point of application)
+\end{itemize}
+
+
+\section{Zoned Executors}
+
+As evoked in (some previous chapter), the Zone integrates on top of an asynchronous execution framework. In order to make zone fully functional (regarding asynchronous invocations), you will need either
+
+Use an instrumented execution framework :
+\begin{itemize}
+\item Executor, ExecutorService, CompletableFuture (with limitations of replacing JRE classes by others : different packages/naming
+\item instrumented third part library, Vertx example.
+\end{itemize}
+
+Or instrument your own execution framework :
+\begin{itemize}
+\item Think to bind to Zone when user submits code to your API (which class stores executable code)
+\item Think Zoned. As long as you don't make an asynchronous execution, context is automatically preserved (same thread)
+\item Be aware of race conditions. Zones are shared among concurrent parts of programs by nature + crossing hooks \emph{will} execute in foreign Zone : An object modified by a crossing hook is not Thread safe, even it is in a thread confined zone.
+\end{itemize}

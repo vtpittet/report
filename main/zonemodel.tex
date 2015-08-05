@@ -1,3 +1,80 @@
 
 \chapter{Zone Model}
 
+Similarities among limitations of prototype implementation gives intuitions that a unique solution exists. Thus the present model aims for general and composable features, allowing to build specific behaviours.
+
+\section{Application Needs}
+
+What the model need to fill following requirements.
+
+\begin{itemize}
+\item include input and output to the zoned code
+\item generals hooks that allow error handling implementation as well as on-the-fly Zone definition.
+\item resolution of the contextual ambiguity in asynchronous error handling
+\end{itemize}
+
+Last elements introduce need of uniform behaviour between synchronous and asynchronous execution.
+That is the real point of exec context.
+
+\section{Crossing Principle}
+
+This approach brings the needed uniformity. Opposed to inherited error handler binding in prototype Zone.
+
+\begin{itemize}
+\item Tasks bound to Zones produce zoned results.
+\item To use a zoned result, one has to extract it in the current Zone, making its content cross Zone boundaries to current Zone and triggering hooks of crossed zones.
+\item If results may contain error as well, crossing hooks can implement error handling.
+\end{itemize}
+
+\section{Zone on Petri Nets}
+
+PN are very well suited to schematize asynchronous systems. I will use it to propose a theorical view of the Zone.
+
+\begin{itemize}
+\item Zone is represented as a set of places, sets can only intersect by containement, there exist one set that contains all places.
+\item PN token is identified as execution flow and dependency flow that the model try to capture.
+\item async tasks run \emph{inside} the Zone.
+\item Zoned results may be used \emph{multiple} times.
+\end{itemize}
+
+\section{Terminology}
+
+Borrowing abstraction from the petri nets, I define the terms:
+
+\begin{itemize}
+\item Token, Zoned Token : Input, output, execution flow that crosses the zones
+\item Task, Zoned Task : Code to be executed, with possible input and output (resp. zoned code)
+\item Token Hooks or crossing hooks : Code defined by zone, triggered when a token crosses the zone boundary.
+\end{itemize}
+
+\section{Properties}
+
+Now that the zone define an operation mode matching (a)synchronous uniformity, I propose the set of essential properties.
+
+\begin{itemize}
+\item Zone Values : as in zone prototype
+\item Around hooks : function from task to task, Union inherited
+\item Crossing Hooks : catch crossing tokens
+\end{itemize}
+
+\section{Binding requirements}
+
+In order to make the Zone easy and clear to use, it needs a binding procedure specification.
+
+\begin{itemize}
+\item general three-phase binding
+\item asynchronous binding
+\item synchronous binding
+\item internal binding
+\end{itemize}
+
+\section{Applications}
+
+At this point, you may wonder if the generalization has gone too far. No error handling, no inherited before hooks, ... I show here how to combine the Zone properties to build up expected features.
+
+\begin{itemize}
+\item Contextual and asynchronous error Handling
+\item Long stack traces or one Zone per task
+\item Asynchronous Dependency tracing
+\item Simulated inheritance for arbitrary custom properties (like javascript before hook)
+\end{itemize}
