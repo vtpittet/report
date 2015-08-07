@@ -1,0 +1,31 @@
+
+\chapter{Asynchronous Approaches}
+\label{ch:asyncworld}
+
+I don't mean to give here a definition of ``asynchronous''.
+This chapter specifies the use of ``asynchronous'' in the current work. Actually, ``asynchronous'' covers different meanings, making it confusing out of context.
+Some may think ``asynchronous'' describes a specific method call, with potential callback code that gets executed after completion. Here, I use it in a more general way, to describe any code that does not run \emph{in sequence} of the code that submitted it. It may run later if there is only one execution unit (single-threaded) or in parallel, potentially later if there is two or more execution unit (mulit-threaded).
+
+% \begin{itemize}
+% \item Thread : OS preemption or VM preemption based on locking mechanisms.
+% \item Thread pools : popular Java framework to optimize threaded programs.
+% \item Callbacks : non-preemptive concurrency. Manual execution unit yield using callbacks (js, dart)
+% \item Callbacks with thread pools : scalable event loop (\vertx)
+% \item Promises or CompletableFutures (in Java) : late-binding callbacks
+% \end{itemize}
+
+\section{Threads}
+
+\section{Thread Pools}
+
+\section{Callbacks}
+
+\section{Callbacks on Thread Pools}
+
+\section{Promises}
+aka completable future in Java.
+
+
+In Java, unlike dart and javascript there is no unique imposed asynchronous model but lots of frameworks built on top of natives threads.
+
+Hence, the Zone developed in this project aim to integrate with any approach. The tool must stay consistent regardless of the asynchronous framework. Single threaded, multi threaded, callbacks, futures or promises

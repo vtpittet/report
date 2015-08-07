@@ -1,9 +1,48 @@
 
 \chapter{Conclusion}
+\label{ch:conclusion}
 
-\section{Objectives}
+We have seen that the Zone for Java brings you innovative building tools. The integration work may be a little complex (as showed the \vertx\ case study), but once this is correctly done, one can almost transparently rely on the Zone as uniform context. In summary, the Zone needs:
+\begin{itemize}
+\item Explicit binding to asynchronous tasks submitted to the framework.
+\end{itemize}
 
-Initial objectives were very specific and usage targeted. Final implementation pushes those primary features to the level of optional ones that can be implemented using Zone primitives.
+In return, it brings:
+\begin{itemize}
+\item Persistent context over asynchronous transitions.
+\item Modeled execution flow between Zones
+\item Flexible programmatic hooks on
+  \begin{itemize}
+  \item Zone binding and execution.
+  \item Asynchronous submission and execution.
+  \item Execution flow across different Zones.
+  \end{itemize}
+\item Extensible and reusable structure.
+\end{itemize}
+
+As a conclusion, I'll show three ways of research and development that can follow the Zone followed by the evolution of point of interest through the research.
+
+\section{Development}
+
+\begin{itemize}
+\item Scope projection
+\item Zone stack manipulation (now rely on ad-hoc convenient hacks)
+\item Buildable API, an extensible DLS to build Zones
+\end{itemize}
+
+\section{Theory}
+
+\begin{itemize}
+\item Representation on Petri nets is useful for understanding but not well formalized. A strict theorization will allow to relate and compare and even associate the Zone to existing petri nets extensions (as versatile boxes (?) or colored Petri net)
+\end{itemize}
+
+\section{Practice}
+
+\begin{itemize}
+\item The zone still is a complex abstraction, especially realizing an integration on an execution framework is hard. A good improvement is to collect experience data and compile it as best practices or trouble shooting doc or even rework some aspect of the model that would appear not well defined.
+\item performance analysis. The Zone adds a lot of wrapping overhead, determine how it can be usable in production environment.
+\end{itemize}
+
 
 \section{Asynchronous problematic}
 

@@ -7,6 +7,7 @@
 
 \usepackage{titlesec}
 \titleformat{\chapter}[display]{\normalfont\scshape}{}{0pt}{\LARGE\flushright}[\tiny\HRule]
+\titlespacing*{\chapter}{0pt}{-90pt}{10pt}
 
 \usepackage{color}
 \definecolor{javared}{rgb}{0.6,0,0} % for strings
@@ -26,13 +27,15 @@ showspaces=false,
 showstringspaces=false}
 \lstset{style=eclipsejava}
 
-\renewcommand{\baselinestretch}{1.1}
+%\renewcommand{\baselinestretch}{1.1}
+
+\setlength{\parindent}{0pt}
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 
-\newcommand{\zonejs}{zone.js }
-\newcommand{\zonedrt}{dart:Zone }
-\newcommand{\vertx}{Vert.x }
+\newcommand{\zonejs}{zone.js}
+\newcommand{\zonedrt}{dart:Zone}
+\newcommand{\vertx}{Vert.x}
 
 
 \begin{document}
@@ -43,15 +46,20 @@ showstringspaces=false}
 
 \tableofcontents
 
+\setlength{\parskip}{\baselineskip}
+
 \input{./main/introduction}
-\input{./main/zoneprototype}
+\input{./main/motivations}
+\input{./main/asyncworld}
+%\input{./main/zoneprototype}
 \input{./main/zonemodel}
+\input{./main/otherapproaches}
+\input{./main/inpractice}
 \input{./main/implementation}
-\input{./main/futurework}
 \input{./main/conclusion}
 
 
-\input{./tail/appendix}
+%\input{./tail/appendix}
 \input{./tail/bibliography}
 
 

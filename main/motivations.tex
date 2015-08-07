@@ -1,0 +1,104 @@
+
+\chapter{Motivations}
+\label{ch:motiv}
+To complete and give a clear idea of the problems I refer to, this chapter presents typical bugs encountered with asynchronous programming.
+
+\section{Asynchronous Scope}
+
+First problem with asynchronous execution is dealing with contextual values. Consider the following code:
+
+\begin{lstlisting}
+Context context;
+
+public void test() {
+  context = Context.STANDARD;
+  doStandardStuff();
+
+  context = Context.CRITICAL;
+  doCriticalStuff();
+
+  context = Context.STANDARD;
+  doStandardStuffAgain();
+}
+\end{lstlisting}
+
+In synchronous code, there is no problem and everything run with expected context. Suppose now that to improve performance, you change the method \lstinline{doCriticalStuff()} code to run asynchronously and forget to care about \lstinline{context}. It's very likely that \lstinline{doCriticalStuff()} will run in a bad context since it may execute \emph{after} \lstinline{context} is modified.
+
+
+This problem can be solved by a context persisting across asynchronous transitions.
+
+
+\section{Error Handling}
+
+If the problem of asynchronous scope seems to basic to require attention, error handling already brings more challenge.
+
+\begin{lstlisting}
+public void test(int input) {
+  
+  try {
+    heavyMathFunction(input);
+  } catch (ArithmeticError e) {
+    // handle error
+  }
+
+}
+\end{lstlisting}
+
+Again, as long as the code is synchronous there is no problem with the try-catch bloc. Once you decide to run asynchronously \lstinline{heavyMathFunction(int)} to avoid application freeze, the code may not handle (even see) a runtime error.
+
+A solution to this problem needs ways to keep error handler across asynchronous transitions or report asynchronous error to specified error handler.
+
+\section{Error Tracing}
+
+Suppose now asynchronous error are caught, debugging unexpected errors is still hard since the stack trace only goes back to the beginning of asynchronous execution. If the cause of the error precedes the code submission, nothing can trace it back to its original cause.
+
+\begin{lstlisting}
+public void test() {
+
+  int input1 = getInput1();
+  startAsyncBatch(input1);
+  // OK
+
+  int input2 = getInput2();
+  startAsyncBatch(input2);
+  // OK
+
+  int input3 = buggyGetInput();
+  startAsyncBatch(input3);
+  // bad implementation, gets bad input and throws
+}
+\end{lstlisting}
+
+During execution, one error pops up, saying that the asynchronous batch got a bad input. It only indicates that somewhere in the code, \lstinline{startAsyncBatch(int)} was called with invalid input. Imagine the stack trace goes back before asynchronous execution. Finding the bug's origin is now a triviality.
+
+To implement this, one could attribute a context value to each asynchronous execution containing the stack trace of the code that submitted the asynchronous code. Then on error handling, simply recover the asynchronous stack trace and add it to the caught error.
+
+\section{Dependencies Tracking}
+
+When asynchronous programs gets large, ordering and dependencies among tasks can be the source of complex bugs. To solve them, we cruelly lack a tool and a representation to visualize how an execution did really happen. This can be done at a very fine level, collecting the exact time at which each task gets started and finished. A more useful approach would be to collect only events when a task uses output of another one to create a dependency graph.
+
+A tool that binds each asynchronous code to a context and capture transitions between these contexts can collect dependencies among asynchronous tasks and export a graphical representation of it, under the form of a directed graph, for example.
+
+\section{Task Profiling}
+
+There are plenty other features we can imagine to ease understanding and analysis of asynchronous programs. For example, one may be interested in how many total time a job required to execute (by opposition to how many time elapsed between the begin and the end of that job).
+
+\begin{lstlisting}
+public void test() {
+  
+  ParallelTask myTask = new ParallelTask();
+
+  long start = System.currentTimeMillis();
+
+  myTask.start();
+  myTask.join();
+
+  long end = System.currentTimeMillis();
+  long elasedTime = end - start;
+  // does not consider parallel subtasks of myTask
+  // elapsed time is not the total execution time
+}
+\end{lstlisting}
+
+Using right tools and abstractions for asynchronous tracing should make it easy to implement such profiling.
+

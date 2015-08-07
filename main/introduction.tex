@@ -1,49 +1,46 @@
 
 \chapter{Introduction}
+\label{ch:intro}
+
+Who never faced the challenge of debugging an asynchronous program ? And even the somewhat simpler task of following its execution and understanding its dependencies is neither easy, as illustrated in chapter \ref{ch:motiv}.
+
+The main reason of this difficulty is that our standard representations assume determinism and do not hold anymore with the non-deterministic brought by asynchronousness.
+However, this non-determinism is precisely what we want when using asynchronous constructs:~there is no way to bypass this problematic.
+
+I propose a solution (chapter \ref{ch:zone}) inspired by the \zonejs\ and \zonedrt\ frameworks to implement functionalities that behave uniformly in synchronous and asynchronous context. Moreover this solution aims to be applicable to any underlying asynchronous framework, at least the most common ones, presented in chapter \ref{ch:asyncworld}. Chapter \ref{ch:approaches} shows how, unlike \zonejs\ and \zonedrt\ the Zone solution for Java implements essential features, allowing to compose almost any other functionality. This way, it pushes down central features as error handling or asynchronous execution tracing as a standard Zone plug-in. It also allows great flexibility to add features responding to needs discovered later.
+
+Practical experiments (chapter \ref{ch:inpractice}) built on top of the Zone showed how they made it possible to modularize a complex properties as tracing each asynchronous transition of the program. On the other hand, while integrating the Zone in an execution framework is hard (consider many cases, avoid duplicate binding), this work has to be done once. After that, use the instrumented executor and zones will be bound transparently.
+
+Finally, chapter \ref{ch:impl} invites you to use the Zone yourself and gives some useful information and implementation tips. The Zone is an innovative tool in that it addresses the problem of uniform behavior across context transitions, regardless of the synchronousness. The Zone allows you to think in terms of transitions between asynchronous tasks and purely implement those transitions once, at a single place.
 
 
-Who never faced the challenge of debugging an asynchronous program ? And even the somewhat simpler task of following its execution and understanding its dependencies is neither easy.
-The main reason of this difficulty is the intrinsic non-determinism. That's precisely what we want when using asynchronous constructs. The real point that make it hard to deal with is the rupture of the control flow across asynchronous calls.
-First, let me give an insight about what I mean by ``control flow'' and how it is lost across asynchronous calls. Indeed, it is a really intuitive concept, but you may try the exercise~: giving a clear definition that one can work it is not that easy.
-
-Now consider the second point, the lost of context. In a pure programmatic sense, the ``context'' of an execution statement is the scope of that context. 
 
 
-What about natively pushing call stack into Executing thread in order to preserve handling context ? This is not a good solution for many reasons.
-\begin{itemize}
-\item Incoherence of execution stack. 
-\item corruption of the executing Thread's stack. As we can see with Thread pools implementations nowadays (as Java's ForkJoinPool), the programmer does not even control its asynchronous task is executed by a fresh Thread. What happens is : another program asynchronously executes tasks submitted by the programmer. If this submission was to modify the executing thread's stack.
-\end{itemize}
-As naive solution, we can imagine, by some mean to collect the exception tables and 
-Rather that automatizing everything and inferring a bad solution half times, the zone provides means for the programmer to know what he's doing and which effects he will archive.
 
-This work presents my analysis and development process to build the final solution. A first pragmatic approach (Zone prototype) allowed me to grab and solve essential integration concerns : How to represent the Zone and how to bind zoned code to it with minimal effort of the user.
 
-Then, naively adding properties implementing wished hooks/solution elements allowed me to quickly grasp the interest and power of the Zone, but also to face rough limitations preventing extension and composability of the Zone. As an answer to this, I developed a model (Zone model) that describes the core functions of the Zone which can be used to represent specific features. (Zone implementation)
 
-This model appears to be an innovative tool that drives you to think about asynchronous programs in a way you did not know before. We will see (Future work) potential extensions and refinements to both the model and the implementation to make the Zone an even more powerful and easy-to-use tool.
 
-\section{Objectives}
 
-\begin{itemize}
-\item Propose solution to stated problems
-\item Target the Java runtime environment
-\item Build an usable tool providing asynchronous execution context in a similar fashion to Zones in \zonejs and \zonedrt.
-\item Targeted features include asynchronous error handling, long stack traces and generation of asynchronous sequence diagram.
-\item The tool should be easily usable and require few, if no adaptation in the user code. I will call this the integration concerns.
-\end{itemize}
+% Initial objectives were very specific and usage targeted. Final implementation pushes those primary features to the level of optional ones that can be implemented using Zone primitives.
 
-\section{A Small Tour of the Asynchronous World}
 
-Before diving in the real matter, let me add a little context to understand on which support we are going to work. Here, I present common existing ways to handle and implement asynchronousness in the Java, javascript and Dart world.
-\begin{itemize}
-\item Thread : OS preemption or VM preemption based on locking mechanisms.
-\item Thread pools : popular Java framework to optimize threaded programs.
-\item Callbacks : non-preemptive concurrency. Manual execution unit yield using callbacks (js, dart)
-\item Callbacks with thread pools : scalable event loop (\vertx)
-\item Promises or CompletableFutures (in Java) : late-binding callbacks
-\end{itemize}
 
-In Java, unlike dart and javascript there is no unique imposed asynchronous model but lots of frameworks built on top of natives threads.
+% This work presents my analysis and development process to build the final solution. A first pragmatic approach (Zone prototype) allowed me to grab and solve essential integration concerns :~How to represent the Zone and how to bind zoned code to it with minimal effort of the user.
 
-Hence, the Zone developed in this project aim to integrate with any approach. The tool must stay consistent regardless of the asynchronous framework.
+% Then, naively adding properties implementing wished hooks/solution elements allowed me to quickly grasp the interest and power of the Zone, but also to face rough limitations preventing extension and composability of the Zone. As an answer to this, I developed a model (Zone model) that describes the core functions of the Zone which can be used to represent specific features. (Zone implementation)
+
+% This model appears to be an innovative tool that drives you to think about asynchronous programs in a way you did not know before. We will see (Future work) potential extensions and refinements to both the model and the implementation to make the Zone an even more powerful and easy-to-use tool.
+
+
+
+% \section{Objectives}
+
+% \begin{itemize}
+% \item Propose solution to stated problems
+% \item Target the Java runtime environment
+% \item Build an usable tool providing asynchronous execution context in a similar fashion to Zones in \zonejs\ and \zonedrt\.
+% \item Targeted features include asynchronous error handling, long stack traces and generation of asynchronous sequence diagram.
+% \item The tool should be easily usable and require few, if no adaptation in the user code. I will call this the integration concerns.
+% \end{itemize}
+
+
