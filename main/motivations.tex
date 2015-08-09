@@ -104,5 +104,5 @@ public void test() {
 }
 \end{lstlisting}
 
-Using right tools and abstractions for asynchronous tracing can make it easy to implement such profiling. In this case, a context that can define the ``timer code'' in the form of a hook around asynchronous execution is the solutions. Then one simply has to wait for complete execution of all sub tasks, collect all individual times from all sub-contexts and sum them to get the precise result.
+Using right tools and abstractions for asynchronous tracing can make it easy to implement such profiling. In this case, a context that can define the ``timer code'' in the form of a hook around asynchronous execution is one solution. Then one simply has to wait for complete execution of all sub tasks, collect all individual times from all sub-contexts and sum them to get the precise result.
 

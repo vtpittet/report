@@ -41,7 +41,9 @@ Use an instrumented execution framework :
 
 Or instrument your own execution framework :
 \begin{itemize}
-\item Think to bind to Zone when user submits code to your API (which class stores executable code)
+\item Think to bind to Zone when user submits code to your API (which class stores executable code), not later, even if the . The user will expect
+\item Be aware that if your API methods rely on other API method (overloaded method to provide default argument), you should not bind submitted code twice.
+\item If your framework rely only on another executor (i.e. does not store any form of executable code), you can simply bind any code submitted to that executor, or better, use a zone-instrumented version of that executor.
 \item Think Zoned. As long as you don't make an asynchronous execution, context is automatically preserved (same thread)
 \item Be aware of race conditions. Zones are shared among concurrent parts of programs by nature + crossing hooks \emph{will} execute in foreign Zone : An object modified by a crossing hook is not Thread safe, even it is in a thread confined zone.
 \end{itemize}
