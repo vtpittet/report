@@ -2,6 +2,24 @@
 \chapter{Zone Model}
 \label{ch:zone}
 
+
+In conclusion, this small overview of the asynchronous world shows that in Java, one cannot assume
+
+Threads used as worker in pools are unaware of when they switch tasks and have no vision...
+Therefore, realizing a Zone 
+
+In Java, unlike dart and javascript there is no unique imposed asynchronous model but lots of frameworks built on top of natives threads.
+
+
+
+Hence, the Zone developed in this project aim to integrate with any approach. The tool must stay consistent regardless of the asynchronous framework. Single threaded, multi threaded, callbacks, events or promises.
+
+This multiplicity brings a constraint on
+As long as you can 
+
+As we will see in the next chapter, the Zone need a hook on asynchronous task submission
+
+In term of integration, the use of thread pools make it impossible to realize a thread-level hook
 The final solution is proposed into two decoupled parts: the integration and the functionalities. The integration, shortly discussed in chapter \label{ch:asyncworld} simply requires that the asynch
 
 Thus the present model aims for general and composable features, allowing to build specific behaviors.
