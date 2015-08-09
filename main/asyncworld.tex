@@ -71,16 +71,25 @@ And final consequence: one-to-one pairing between executed tasks and threads is 
 
 \section{Callbacks}
 
-Callbacks 
+Callbacks are always associated with an asynchronous method. Usually, a callback is a piece of code (function pointer, anonymous class, labmda) taking as argument the output of its associated asynchronous method. The callback is not an asynchrnous execution framework per se, but a way to append code to the asynchronous method. However, the callback itself still to \emph{declares} asynchronous code. Indeed, the callback code is submitted on method call and executed after the asynchronous method has returned. Note that the callback is not necessarily executed in sequence of its associated method. It can be asynchronous relative to that method too.
 
-An asynchronous method with a callback is a way to bind asynchronous . Hence 
+Callbacks are not mutually exclusive with thread pools. On the contrary, asynchronous methods and callbacks are points in the program where the execution service can safely switch between different programs. You may have noticed the similarity with a programm yielding the processor in a non-preemptive scheduler. Using asynchronous methods and callbacks breaks a task in smaller tasks indicating to the scheduler where it can safely pause an execution to undertake another subtask. In this context, asynchronous methods typically allow to pause the execution of a blocking call, for full benefit. This explains why callback use is so important in javascript. The non-preemptive single threaded executor of javascript has many point to switch tasks and can archive effective parallelism.
 
-The callback approach is less seen in Java, but is central in Dart and javascript. This makes it interesing enough to consider, since \zonejs\ and \zonedrt\ are the starting points of the project. But additionally, the popular \vertx\ framework makes a high use of this pattern on the Java virtual machine. 
+The callback approach is less seen in Java, but is central in Dart and javascript. But recently, the popular \vertx\ framework relying on callbacks successfully uses this pattern on the Java virtual machine. \vertx\ illustrates well that callbacks works with thread pools. The \vertx\ API presents asynchronous methods with callbacks, but under the hood relies on thread pools to get asynchronousness.
 
-They can be built in Java, especially with the lambdas of Java 8. The \vertx\ framework is a good example. But remember this is just an API. Under the hood, \vertx\ uses a thread pool to get asynchronousness.
 
 \section{Promises}
-aka completable future in Java.
+
+An asynchronous method with a callback is a way to bind two codes, the callback having to execute after the method returns. This method is limited. Wheter to bind one method call to multiple callbacks or reversly multiple method calls to one callback is not easy. 
+
+The promise represent the future result of 
+and offers many possibilities. 
+
+Promises
+
+
+Called \lstinline{CompletableFuture} in Java, they are present since Java 8 in the core library.
+
 
 \section{Handlers}
 At the risk of oversimplifying the reality, I regroup in this category framework as Swing, based on observers or handlers
