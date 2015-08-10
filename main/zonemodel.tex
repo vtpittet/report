@@ -70,7 +70,7 @@ The Zone identifies a crossing event when a token moves between two places that 
 In order to know which Zone originated a token, they are wrapped as zoned tokens. A zoned token is simply a tuple containing a Token and its origin Zone.
 
 Operations on token while crossing Zone boundaries are described by the Zone's crossing hooks.
-The presence of around-hooks defined in the Zone allows even more capabilities. Howver, unlike the crossing-hooks, these around-hooks are closer to an implementation feature than a primary effect of the model.
+The presence of around hooks defined in the Zone allows even more capabilities. Howver, unlike the crossing hooks, these around hooks are closer to an implementation feature than a primary effect of the model.
 
 \section{Terminology}
 
@@ -113,7 +113,7 @@ Function<ZonedToken<T>, ZonedToken<U>> zonedTask;
 
 \section{Cross Resolution}
 
-The crossing principle is the original feature of the Zone. The base mechanism is simple. Value outputted by zoned tasks are \emph{zoned tokens}. When the value of a zoned token is used, it is extracted to the current Zone triggering the crossed Zones cross-hook on the fly.
+The crossing principle is the original feature of the Zone. The base mechanism is simple. Value outputted by zoned tasks are \emph{zoned tokens}. When the value of a zoned token is used, it is extracted to the current Zone triggering the crossed Zones crossing hook on the fly.
 
 Multiple cases can occur with crossing mechanisms. Especially in the Java implementation, where it is possible to keep and carry around references to already bound tasks, a token extraction can occur in unexpected contexts. Rather than relying on visibility restrictions to prevent such unusual cases to occur, the cross resolution defines how the model behaves under such circumstances.
 
@@ -146,7 +146,7 @@ The crossing token is \emph{not} a zoned token. Zoned token used by the framewor
 \begin{enumerate}
 \item Collect the Zone stack of the source Zone and the destination Zone to get the source stack and the destination stack.
 \item Eliminate the common bottom part of the stacks. Recall that every Zone is a (indirect) child of the Root Zone, hence both stacks have at lesast one Zone in common. The idea of this step is to find the closest common enclosing Zone of src and dst: the \emph{join Zone}.
-\item Cross out the rest of the source stack in top-down order with tkn. This means calling each cross-hooks of the crossed Zone with the crossing token as argument.
+\item Cross out the rest of the source stack in top-down order with tkn. This means calling each crossing hooks of the crossed Zone with the crossing token as argument.
 \item Cross in the rest of the destination stack in down-top order with tkn.
 \end{enumerate}
 
@@ -264,16 +264,16 @@ access to the Zone-specific values.
 
 The context of a zoned task persists asynchronoulsy. If an asynchronous task is started from a Zone, it must keep contextual access to that Zone.
 
-Every element crossing a Zone boundary triggers its \emph{cross-hooks} (discussed in Cross Resolution section).
+Every element crossing a Zone boundary triggers its \emph{crossing hooks} (discussed in Cross Resolution section).
 
-Code executed inside the Zone is intercepted and passed to its \emph{run-hooks}. The code that executes inside a Zone can be manipulated by the Zone itself, according to its hooks specification. Here is an illustration of an internal Zone execution:
+Code executed inside the Zone is intercepted and passed to its \emph{run hooks}. The code that executes inside a Zone can be manipulated by the Zone itself, according to its hooks specification. Here is an illustration of an internal Zone execution:
 
 \begin{lstlisting}
 Zone myZone = ...
 
 myZone.run(() -> {
   // code enclosed in this block is 'zoned' and
-  // hooked as internal execution by the 'run-hook' of myZone
+  // hooked as internal execution by the 'run hook' of myZone
 });
 \end{lstlisting}
 
@@ -290,7 +290,7 @@ myZone.run(() -> {
 
   myExecutor.execute(() -> {
     // code enclosed in this block is still zoned in myZone
-    // it is hooked as asynchronous submission by the 'async-hook' of myZone
+    // it is hooked as asynchronous submission by the 'async hook' of myZone
   });
   
 });
@@ -300,7 +300,7 @@ myZone.run(() -> {
 
 The internal binding and execution of a task follow six steps :
 \begin{enumerate}
-\item Task is bound to the Zone, run-hooks are applied.
+\item Task is bound to the Zone, run hooks are applied.
 \item The current Zone reference is updated to the Zone of execution.
 \item An empty token crosses to the Zone of execution (Cross Resolution applied).
 \item The task, hooked by the Zone, executes.
@@ -312,8 +312,8 @@ The internal binding and execution of a task follow six steps :
 
 The asynchronous binding and execution is quite different from the internal. Unlike internally bound task, asynchronous task does not automatically triggers cross operation. In fact, it is not possible a-priori to know when the task will be executed, from which context will come its input (i.e. the task depends on the execution of another task) neither in which context will be used its output (i.e. another task depends on the execution of this task). This summarizes to the following two points:
 \begin{enumerate}
-\item An asynchronously zoned task input may come from another Zone (hence causing cross-hook operations)
-\item An asynchronously zoned task output may be used in another Zone (hence causing cross-hook operations)
+\item An asynchronously zoned task input may come from another Zone (hence causing crossing hook operations)
+\item An asynchronously zoned task output may be used in another Zone (hence causing crossing hook operations)
 \end{enumerate}
 
 Since the cross resolution is done on use-site, it takes into account its specific execution context :
@@ -340,13 +340,43 @@ For comparison with internal binding, asynchronous binding and execution of a ta
 
 \section{Properties} % TODO
 
-Now that the zone define an operation mode matching (a)synchronous uniformity, I propose the set of essential properties.
+The three aforementionned properties, crossing hooks, around hooks and Zone values are defined and used by the Zone as follows.
 
-\begin{itemize}
-\item Zone Values : as in zone prototype
-\item Around hooks : function from task to task, Union inherited
-\item Crossing Hooks : catch crossing tokens
-\end{itemize}
+\subsection*{Zone Values}
+Zone values storage implements Java-like block scoping rules: an inner Zone sees and can shadow its outer zone values, but the opposite does not hold. Since zone values are accessible from anywhere (especially from concurrent contexts), Zone storage is immutable to limit risk of race conditions. Note that, in Java, it is still possible to have an immutable reference to a mutable value to bypass this restriction.
+
+The Zone allows to lookup a key for one value, but also to fully lookup a key to retrieve the list of all values defined for that key in the parent Zones.
+
+\subsection*{Crossing Hooks}
+
+The crossing hooks are defined by the Zone as function from token to token. Hence, they can inspect the token, make computations and return a \emph{new} token with updated value. It is required that tokens are immutable. The reason is that the same zoned token may be used multiple times. If multiple tasks depend on the same asynchronous execution (hence having multiple callbacks for one method), its resulting token will be used once per dependency. Then it is crucial that always the same token is used, not mentioning the risk of race conditions, if two concurrent crossing hooks run with the same zoned Token.
+
+\subsection*{Around Hooks}
+
+Around hook discussion distinguished the run hooks and asynchronous hooks, but both make the same task. Only their application point differ. That is why they are not distinguished here and aggregated under the term of ``around hook''.
+
+Around hooks are represented as function from zoned task to zoned task, giving the opportunity to surround hooked task with a try-catch block, offering the choice  to execute or not the hooked task and even to run the task in a dynamically created Zone. Moreover, in a Zone, around hooks are inherited from enclosing Zones and gets applied from innermost
+to outermost hook. For example : -- SCHEME--
+
+\subsection*{Around Hooks Inheritance}
+
+For more flexibility, around hooks are inherited but not repeated. Consider three zones :
+
+\begin{tabular}{|l|l|l|l|}
+\hline
+Zone & Enclosing Zone & Defined Around run & Applied around run 
+\\\hline
+outerZone & None & $f$: Task $\rightarrow$ Task & $f$
+\\\hline
+middleZone & outerZone & $g$: Task $\rightarrow$ Task & $f \circ g$
+\\\hline
+innerZone & middleZone & $f$: Task $\rightarrow$ Task & $f \circ g$
+\\\hline
+\end{tabular}
+
+In innerZone, $f$ hook does not get applied one more time, because it would repeat inherited f hook from outerZone. When the same hook is inherited multiple times, the outermost origin determines its application position. In the previous example, innerZone applies $( f \circ g )$ and not $( g \circ f )$ because the outermost origin of $f$ (outerZone) encloses the outermost origin of $g$ (middleZone). This prevents inner Zones from modifying accidentally inherited hooks application order.
+
+This inheritance policy is simply more general than a blind straight-forward application of all hooks. It is easy (especially programmatically) to re-create a different instance of a hook with the same functionality to prevent it from being filtered out. On the other hand, given a single function composed of many hooks, it is hard, if not impossible, to filter out repetitions to get this union-inheritance.
 
 \section{Realisation}
 
