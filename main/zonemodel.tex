@@ -255,56 +255,6 @@ Join Zone & Parent Zone \\ \hline
 
 Unlike previous cases, the join Zone is neither the source or the destination Zone. At the beginning of the zoned code, the step 3 triggers one cross-out from child 1, then the step 4 triggers one cross-in to child 2. As intended by the written code, at no point, parent Zone gets crossed in or out. The whole execution is \emph{inside} the parent Zone.
 
-
-\section{Properties} % TODO
-
-Now that the zone define an operation mode matching (a)synchronous uniformity, I propose the set of essential properties.
-
-\begin{itemize}
-\item Zone Values : as in zone prototype
-\item Around hooks : function from task to task, Union inherited
-\item Crossing Hooks : catch crossing tokens
-\end{itemize}
-
-\section{Realisation}
-
-The hypothesis that any submitted asynchronous code can be hooked permits to safely ignore the Zone integration when discussing its functionalities. The integration will be always possible. This is a great benefit, since it effectively decouples the Zone functional specification from its integration concerns, confronted to the multity of evoluting asynchronous frameworks in Java.
-
-To integrate a Zone in a program, one can see it as a generalization of a Java thread local\footnote{A Java thread local is a field that is unique for each thread}. Note that the concept of thread local is not limited to Java. Indeed, it can be easily implemented using a mapping with threads as keys and thread locals as values.
-
-When using a thread pool, the concept of thread local becomes limited, even erroneous. Thread locals are bound to a specific thread, but the user does not controls how its tasks are bound to the threads. The common pattern to solve this is to wrap submitted code with instructions that update the thread local for the code.
-\begin{lstlisting}
-
-ThreadLocal<T> threadLocal = ...
-Executor executor = ...
-
-/*
- * Submitted code will update the thread local on execution.
- */
-public void submitWithLocal(Runnable code, T local) {
-  Runnable newCode = () -> {
-    threadLocal.set(local);
-    code.run();
-  };
-
-  executor.execute(newCode);
-}
-\end{lstlisting}
-
-The Zone is a generalization of this method. Rather than binding a runnable, any code is accepted, denoted as \emph{task}. A task is executable code, with optionally inputs and outputs. The Zone handles internally the thread local to store itself and simply exports a bind method.
-The Zone takes advantage of this binding operation to apply its internal mechaninc and all submission hooks that it defines. Based on this single binding, it provides:
-\begin{itemize}
-\item Asynchronous persistent context.
-\item Modelled execution flow between the Zones.
-\item Flexible programmable hooks on Zone transitions and code submission to the Zone.
-\item Extension and reusability mechanisms to extend and implement more Zone features.
-\end{itemize}
-
-
-This pattern efficiently decouples the Zone integration from its functionalities. To use it, one only needs to bind each submitted asynchronous task to the Zone. This can be even simpler using a ``Zone-aware executor'', see chapter \ref{ch:impl}.
-
-Chapter \ref{ch:asyncworld} showed that in Java, one cannot assume a single execution framework. The presented binding solution is not a uniform solution that automagically works in any context. It describes a single operation to execute on every asynchronous submission, which can even be modularized in the execution framework. That is how the Zone gets integrated in programs.
-
 \section{Task Binding}
 
 This section presents how zones and tasks interact. Specifically, what make a task \emph{zoned} and how to bind a task to a Zone.
@@ -387,6 +337,56 @@ For comparison with internal binding, asynchronous binding and execution of a ta
 \item The result token zoned in the executing Zone is returned (Cross Resolution applied only but each time the result is used).
 
 \end{enumerate}
+
+\section{Properties} % TODO
+
+Now that the zone define an operation mode matching (a)synchronous uniformity, I propose the set of essential properties.
+
+\begin{itemize}
+\item Zone Values : as in zone prototype
+\item Around hooks : function from task to task, Union inherited
+\item Crossing Hooks : catch crossing tokens
+\end{itemize}
+
+\section{Realisation}
+
+The hypothesis that any submitted asynchronous code can be hooked permits to safely ignore the Zone integration when discussing its functionalities. The integration will be always possible. This is a great benefit, since it effectively decouples the Zone functional specification from its integration concerns, confronted to the multity of evoluting asynchronous frameworks in Java.
+
+To integrate a Zone in a program, one can see it as a generalization of a Java thread local\footnote{A Java thread local is a field that is unique for each thread}. Note that the concept of thread local is not limited to Java. Indeed, it can be easily implemented using a mapping with threads as keys and thread locals as values.
+
+When using a thread pool, the concept of thread local becomes limited, even erroneous. Thread locals are bound to a specific thread, but the user does not controls how its tasks are bound to the threads. The common pattern to solve this is to wrap submitted code with instructions that update the thread local for the code.
+\begin{lstlisting}
+
+ThreadLocal<T> threadLocal = ...
+Executor executor = ...
+
+/*
+ * Submitted code will update the thread local on execution.
+ */
+public void submitWithLocal(Runnable code, T local) {
+  Runnable newCode = () -> {
+    threadLocal.set(local);
+    code.run();
+  };
+
+  executor.execute(newCode);
+}
+\end{lstlisting}
+
+The Zone is a generalization of this method. Rather than binding a runnable, any code is accepted, denoted as \emph{task}. A task is executable code, with optionally inputs and outputs. The Zone handles internally the thread local to store itself and simply exports a bind method.
+The Zone takes advantage of this binding operation to apply its internal mechaninc and all submission hooks that it defines. Based on this single binding, it provides:
+\begin{itemize}
+\item Asynchronous persistent context.
+\item Modelled execution flow between the Zones.
+\item Flexible programmable hooks on Zone transitions and code submission to the Zone.
+\item Extension and reusability mechanisms to extend and implement more Zone features.
+\end{itemize}
+
+
+This pattern efficiently decouples the Zone integration from its functionalities. To use it, one only needs to bind each submitted asynchronous task to the Zone. This can be even simpler using a ``Zone-aware executor'', see chapter \ref{ch:impl}.
+
+Chapter \ref{ch:asyncworld} showed that in Java, one cannot assume a single execution framework. The presented binding solution is not a uniform solution that automagically works in any context. It describes a single operation to execute on every asynchronous submission, which can even be modularized in the execution framework. That is how the Zone gets integrated in programs.
+
 
 \section{Applications} % Independent chapter ?: Answer to motivation.
 
