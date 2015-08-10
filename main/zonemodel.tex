@@ -2,27 +2,53 @@
 \chapter{Zone Model}
 \label{ch:zone}
 
+The Zone described in this chapter is a solution to represent and easily implement behaviors on asynchronous transitions. Moreover, it defines a \emph{uniform} execution in both synchronous and asynchronous execution. 
 
-In conclusion, this small overview of the asynchronous world shows that in Java, one cannot assume
+Recall the two points of the asynchronous definition:
+\begin{itemize}
+\item Asynchronous code is \emph{submitted} to the executor.
+\item Execution is \emph{not sequental} to the submission.
+\end{itemize}
 
-Threads used as worker in pools are unaware of when they switch tasks and have no vision...
-Therefore, realizing a Zone 
+The first point allows to define a hook on code submission, used to specify the Zone integration. The second is the asynchronous character of the execution, cause of problems discussed in chapter \label{ch:modiv}.
 
-In Java, unlike dart and javascript there is no unique imposed asynchronous model but lots of frameworks built on top of natives threads.
-
+The hypothesis that any submitted asynchronous code can be hooked permits to safely ignore the Zone integration when discussing its functionalities. The integration will be always possible, and simplified if the Zone provides a method to bind submitted code. This is a great benefit, since it effectively decouples the Zone functional specification from its integration concerns, confronted to the multity of evoluting asynchronous frameworks in Java.
 
 
-Hence, the Zone developed in this project aim to integrate with any approach. The tool must stay consistent regardless of the asynchronous framework. Single threaded, multi threaded, callbacks, events or promises.
+% Hence I rely on the hypothesis that the Zone is integrated to an execution framework by hooking asynchronous code submission to the framework and binding that code to the Zone.
 
-This multiplicity brings a constraint on
-As long as you can 
 
-As we will see in the next chapter, the Zone need a hook on asynchronous task submission
+% Given the multity of asynchronous frameworks in the Java ecosystem selecting one 
 
-In term of integration, the use of thread pools make it impossible to realize a thread-level hook
-The final solution is proposed into two decoupled parts: the integration and the functionalities. The integration, shortly discussed in chapter \label{ch:asyncworld} simply requires that the asynch
 
-Thus the present model aims for general and composable features, allowing to build specific behaviors.
+% In conclusion, this small overview of the asynchronous world shows that in Java, one cannot assume
+
+% Threads used as worker in pools are unaware of when they switch tasks and have no vision...
+% Therefore, realizing a Zone 
+
+% In Java, unlike dart and javascript there is no unique imposed asynchronous model but lots of frameworks built on top of natives threads.
+
+
+
+% Hence, the Zone developed in this project aim to integrate with any approach. The tool must stay consistent regardless of the asynchronous framework. Single threaded, multi threaded, callbacks, events or promises.
+
+% This multiplicity brings a constraint on
+% As long as you can 
+
+% As we will see in the next chapter, the Zone need a hook on asynchronous task submission
+
+% In term of integration, the use of thread pools make it impossible to realize a thread-level hook
+% The final solution is proposed into two decoupled parts: the integration and the functionalities. The integration, shortly discussed in chapter \label{ch:asyncworld} simply requires that the asynch
+
+% Thus the present model aims for general and composable features, allowing to build specific behaviors.
+
+\section{Terminology}
+
+The Zone brings its own little vocabulary.
+
+\paragraph{The Zone}
+
+Is an execution context associated to a code block. It represents the asynchronous extension of a scope with the following improvements. Any code 
 
 \section{Application Needs}
 
