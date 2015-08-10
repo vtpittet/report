@@ -1,19 +1,4 @@
 
-\chapter{Zone Model}
-\label{ch:zone}
-
-The Zone described in this chapter is a solution to represent and easily implement behaviors on asynchronous transitions. Moreover, it defines a \emph{uniform} execution in both synchronous and asynchronous execution. 
-
-Recall the two points of the asynchronous definition:
-\begin{itemize}
-\item Asynchronous code is \emph{submitted} to the executor.
-\item Execution is \emph{not sequental} to the submission.
-\end{itemize}
-
-The first point allows to define a hook on code submission, used to specify the Zone integration. The second is the asynchronous character of the execution, cause of problems discussed in chapter \label{ch:modiv}.
-
-The hypothesis that any submitted asynchronous code can be hooked permits to safely ignore the Zone integration when discussing its functionalities. The integration will be always possible, and simplified if the Zone provides a method to bind submitted code. This is a great benefit, since it effectively decouples the Zone functional specification from its integration concerns, confronted to the multity of evoluting asynchronous frameworks in Java.
-
 
 % Hence I rely on the hypothesis that the Zone is integrated to an execution framework by hooking asynchronous code submission to the framework and binding that code to the Zone.
 
@@ -42,30 +27,78 @@ The hypothesis that any submitted asynchronous code can be hooked permits to saf
 
 % Thus the present model aims for general and composable features, allowing to build specific behaviors.
 
-\section{Terminology}
+% \section{Application Needs}
 
-The Zone brings its own little vocabulary.
+% What the model need to fill following requirements.
 
-\paragraph{The Zone}
+% \begin{itemize}
+% \item include input and output to the zoned code
+% \item generals hooks that allow error handling implementation as well as on-the-fly Zone definition.
+% \item resolution of the contextual ambiguity in asynchronous error handling
+% \end{itemize}
 
-Is an execution context associated to a code block. It represents the asynchronous extension of a scope with the following improvements. Any code 
+% Last elements introduce need of uniform behavior between synchronous and asynchronous execution.
+% That is the real point of exec context.
 
-\section{Application Needs}
+\chapter{The Zone}
+\label{ch:zone}
 
-What the model need to fill following requirements.
+The Zone is an execution context associated to a code block. It represents the asynchronous extension of a scope. Like a scope, the Zone can contain other Zones, define key-value bindings and an inner Zone can see and override outer Zone's key-value bindings. Any code executed or asynchronously submitted in a Zone stays and executes in this Zone.
 
+In addition the Zone defines two kinds of code hooks: the around hooks, to modify submitted code to the Zone and the cross hooks to implement behaviors on entering or leaving a Zone.
+
+%Any code executed or asynchronoulsy submitted in a Zone stays in that Zone. This guarantees asynchronous consistency. A Zone can contain another Zone, as a scope encloses inner scopes. The Zone defines key-value bindings, the equivalent of lexically scoped values. Similarily, the Zone can overload 
+
+The cross hook is the specificity of the Zone. It can represent and easily implement behaviors on Zone transitions. Since Zones are stable across asynchronous executions, zone crossing behaviors run uniformly in synchronous and asynchronous contexts.
+
+
+The primordial purpose of Zones is to answer the lack of context persistency when submitting asynchronous task. Zones allow to store key-value bindings and persist across asynchronous execution. Hence, they make it possible to share information between asynchronous executions. Because the key-value bindings may be shared by concurrent executions, they must stay immutable to avoid race conditions. However, it is still possible to locally add more key-value bindings by creating a new Zone with additional bindings. It is safe since concurrent executions won't be affected by the local context modification. Furthermore, it is still possible in Java to bypass this limitation, modifiying the \emph{content} of immutable references.
+
+The Zone is intended to provide a context across asynchronous executions. It specifies constant values accessible through context (Zone values), task to execute when entering (cross-in hook) or exiting (cross-out hook) a Zone and hooks around synchronous and asynchronous task execution. Those around hooks make it possible to manipulate the tasks that get executed inside the Zone. While they are not essential to the concept of Zone itself, the opportunity to implement them naturally appears in a Zone implementation since it is a Zone requirement (see next section). The Zone can then simply make these hooks accessible on its interface.
+
+\section{Integration}
+
+The hypothesis that any submitted asynchronous code can be hooked permits to safely ignore the Zone integration when discussing its functionalities. The integration will be always possible. This is a great benefit, since it effectively decouples the Zone functional specification from its integration concerns, confronted to the multity of evoluting asynchronous frameworks in Java.
+
+To integrate a Zone in a program, one can see it as a generalization of a Java thread local\footnote{A Java thread local is a field that is unique for each thread}. Note that the concept of thread local is not limited to Java. Indeed, it can be easily implemented using a mapping with threads as keys and thread locals as values.
+
+When using a thread pool, the concept of thread local becomes limited, even erroneous. Thread locals are bound to a specific thread, but the user does not controls how its tasks are bound to the threads. The common pattern to solve this is to wrap submitted code with instructions that update the thread local for the code.
+\begin{lstlisting}
+
+ThreadLocal<T> threadLocal = ...
+Executor executor = ...
+
+/*
+ * Submitted code will update the thread local on execution.
+ */
+public void submitWithLocal(Runnable code, T local) {
+  Runnable newCode = () -> {
+    threadLocal.set(local);
+    code.run();
+  };
+
+  executor.execute(newCode);
+}
+\end{lstlisting}
+
+The Zone is a generalization of this method. Rather than binding a runnable, any code is accepted, denoted as \emph{task}. A task is executable code, with optionally inputs and outputs. The Zone handles internally the thread local to store itself and simply exports a bind method.
+The Zone takes advantage of this binding operation to apply its internal mechaninc and all submission hooks that it defines. Based on this single binding, it provides:
 \begin{itemize}
-\item include input and output to the zoned code
-\item generals hooks that allow error handling implementation as well as on-the-fly Zone definition.
-\item resolution of the contextual ambiguity in asynchronous error handling
+\item Asynchronous persistent context.
+\item Modelled execution flow between the Zones.
+\item Flexible programmable hooks on Zone transitions and code submission to the Zone.
+\item Extension and reusability mechanisms to extend and implement more Zone features.
 \end{itemize}
 
-Last elements introduce need of uniform behavior between synchronous and asynchronous execution.
-That is the real point of exec context.
+
+This pattern efficiently decouples the Zone integration from its functionalities. To use it, one only needs to bind each submitted asynchronous task to the Zone. This can be even simpler using a ``Zone-aware executor'', see chapter \label{ch:impl}.
+
+Chapter \label{ch:asyncworld} showed that in Java, one cannot assume a single execution framework. The presented binding solution is not a uniform solution that automagically works in any context. It describes a single operation to execute on every asynchronous submission, which can even be modularized in the execution framework. That is how the Zone gets integrated in programs.
+
 
 \section{Crossing Principle}
 
-This approach brings the needed uniformity. Opposed to inherited error handler binding in prototype Zone.
+The crossing principle is the original feature of the Zone presented in this document.
 
 \begin{itemize}
 \item Tasks bound to Zones produce zoned results.
@@ -83,6 +116,7 @@ PN are very well suited to schematize asynchronous systems. I will use it to pro
 \item async tasks run \emph{inside} the Zone.
 \item Zoned results may be used \emph{multiple} times.
 \end{itemize}
+
 
 \section{Terminology}
 
@@ -115,7 +149,7 @@ In order to make the Zone easy and clear to use, it needs a binding procedure sp
 \item internal binding
 \end{itemize}
 
-\section{Applications}
+\section{Applications} % Independent chapter ?: Answer to motivation.
 
 At this point, you may wonder if the generalization has gone too far. No error handling, no inherited before hooks, ... I show here how to combine the Zone properties to build up expected features.
 
