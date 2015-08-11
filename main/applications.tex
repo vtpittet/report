@@ -1,0 +1,156 @@
+
+\chapter{Applications}
+\label{ch:apps}
+
+
+So far, the presented Zone is mostly theoretical. Around and crossing hooks have a precisely defined behavior, but beside Zone local storage, no feature answers the motivations for the Zone. I show here how to combine the Zone properties to build solution the initial problems.
+
+\section{Asynchronous error handling}
+
+Asynchronous error handling exists in two forms, contextual and systematic.
+
+\paragraph{The contextual error handling} consists in using the Zone as a standard try-catch block. The figure \ref{fig:sas-tc} illustrates the parallel between synchronous and asynchronous error handling.
+
+In this example, \lstinline{future = asyncCall()} starts an asynchronous task and return the \lstinline{Future} result of that task. Of course, the task will throw an error. Two cases are considered.
+
+\begin{enumerate}
+\item Access \lstinline{message} inside the \lstinline{ErrorZone}\\
+The error is not handled by the \lstinline{ErrorZone}. Nothing gets printed, since \lstinline{future.get()} synchronously throws its error inside the \lstinline{ErrorZone}.
+\item Access \lstinline{message} outside the \lstinline{ErrorZone}\\
+Upon \lstinline{future.get()}, the result, zoned inside \lstinline{ErrorZone} must cross out the Zone. The error gets handled and a fallback value is provided.
+\end{enumerate}
+
+The \lstinline{ErrorZone} simply has to implement the crossing hook:
+
+\begin{lstlisting}
+/*
+ * Checks if crossing token 'token' is an error token.
+ * If yes, handle the error.
+ */
+public Token crossOut(Token token) {
+  if (token.isErrorToken()) {
+    Token fixed;
+    // error handling ...
+    return fixed;
+  } else {
+    // do nothing
+    return token;
+  }
+}
+\end{lstlisting}
+
+The cross resolution algorithm then accomplishes the work of selecting correct hooks according to the calling context.
+
+\begin{figure}[H]
+\centering
+\makebox[0pt][c]{
+\begin{minipage}[l]{0.6\linewidth}
+\centering
+\begin{lstlisting}
+Future<String> future;^^J
+^^J
+// begin of async try-catch block^^J
+(new ErrorZone()).run(() -> {^^J
+^^J
+\ \ future = asyncCall();^^J
+^^J
+\ \ // (1)^^J
+\ \ String message = future.get();^^J
+\ \ System.out.println(message);^^J
+});^^J
+// end of async try-catch block^^J
+^^J
+// (2)^^J
+String message = future.get();^^J
+System.out.println(message);^^J
+\end{lstlisting}
+\end{minipage}
+
+
+\begin{minipage}[c]{0pt}
+\begin{center}
+\rule{0.4mm}{0.3\textheight}
+\end{center}
+\end{minipage}
+
+\begin{minipage}[r]{0.6\linewidth}
+\centering
+\begin{lstlisting}
+String future;^^J
+^^J
+// begin of sync try-catch bloc^^J
+try {^^J
+^^J
+\ \ message = syncCall();^^J
+^^J
+\ \ // (1)^^J
+\ \ System.out.println(message);^^J
+^^J
+} catch (Error e) { ... }^^J
+// end of sync try-catch block^^J
+^^J
+// (2)^^J
+^^J
+System.out.println(message);^^J
+\end{lstlisting}
+\end{minipage}
+}
+\caption{Asynchronous and synchronous try-catch block}
+\label{fig:sas-tc}
+\end{figure}
+
+\paragraph{Systematic error handling} is an automatization to uniformly wrap asynchronous code \emph{inside} a try-catch block. This can be compared to Java's \lstinline{Thread.UncaughtExceptionHandler} with the differences:
+
+\begin{enumerate}
+\item The code catches the errors \emph{before} some third-party execution service (thread pool for example), preventing the exeuction to reach the \lstinline{Thread.UncaughtExceptionHandler}.
+\item The setting is not global but local to the zoned portion of the code. With \lstinline{Thread.UncaughtExceptionHandler}, one has to carefully set and unset the value.
+\item Many different default exception handler can be easily emitted by the same thread.
+\end{enumerate}
+
+Such behavior is provided by a Zone implementing the asynchronous hook:
+
+\begin{lstlisting}
+// asynchronous hook
+ZonedTask aroundSubmit(ZonedTask task) {
+  return (input) -> {
+    ZonedToken result = task.apply(input);
+    if (result.isErrorToken()) {
+      ZonedToken fallbackValue;
+      //handle logic, compute fallbackValue
+      return fallbackValue;
+    } else {
+      return result;
+    }
+  };
+}
+\end{lstlisting}
+
+Since around hooks completely apply before crossing out the Zone, cross-out based error handling does not interfere with this code.
+
+\section{One Zone per asynchronous task}
+
+This is not a direct solution to one problem of chapter \ref{ch:motiv}, but an intermediate tool to build other features. The idea is simple. Use an asynchronous hook to bind submitted task inside a new Zone.
+
+\begin{lstlisting}
+ZonedTask aroundSubmit(ZonedTask task) {
+  Zone newZone = new ZoneX();
+  ZonedTask newTask = newZone.bind(task);
+  return newTask;
+}
+\end{lstlisting}
+
+\lstinline{ZoneX} can be any Zone implementation, with the single constraint that it should override the internal hook application mechanism to do nothing. Otherwise, \lstinline{newTask} may apply unexpected internal hooks, inherited by enclosing Zones. The problem is that any \emph{internal} hooks will be also applied where \emph{asynchronous} hooks are.
+
+\section{Long stack traces}
+
+Implementation of long stack traces use one Zone per asynchronous task to set a Zone value containing the call stack trace of the asynchronous task. With contextual error handling, it simply defines an asynchronous hook to run submitted code inside a new Zone that:
+\begin{enumerate}
+\item Stores as Zone local value the stack trace at the asynchronous submission.
+\item Wraps zoned code inside a try-catch block to catch any error, append stored stack trace and re-throw it.
+\end{enumerate}
+
+Long stack traces are also possible with systematic error handling, but require heavier mechanisms to ensure that the stack trace is always updated before being caught by the \lstinline{catch} clauses of error handling.
+
+\section{Asynchronous dependency tracing}
+
+Chapter \ref{ch:inpractice} discusses in details asynchronous dependency tracking as a concrete experiment. The principle is however simple. Use one Zone per asynchronous task with IDs and implement a crossing hook to store the transitions from one Zone to another one to some data structure of your choice. One Zone per task creates a one-to-one correspondance between asynchronous tasks and IDs, the crossing hook detects and stores execution dependencies between two IDs.

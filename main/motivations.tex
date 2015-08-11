@@ -71,7 +71,53 @@ public void test() {
 
 During execution, one error pops up, saying that the asynchronous batch got a bad input. It only indicates that somewhere in the code, \lstinline{startAsyncBatch(int)} was called with an invalid input. Imagine the stack trace going back before asynchronous execution. Finding the bug's origin is now a triviality. 
 
-\dotfill ADD EXAMPLE STACK TRACE WITH EXPLAINATIONS.\dotfill
+As illustration, consider this test code.
+
+\begin{lstlisting}
+private void pathStep1() {
+  pathStep2();
+}
+
+private void pathStep2() {
+  asyncExecutor1.execute(() -> pathStep3());
+}
+
+private void pathStep3() {
+  pathStep4();
+}
+
+private void pathStep4() {
+  asyncExecutor2.execute(() -> throw new TestError());
+}
+\end{lstlisting}
+
+With standard stack traces, the error only indicates something like
+
+\begin{lstlisting}
+TestError: Unhandled intended testing error
+        at Test.throwError(Test.java:102)
+\end{lstlisting}
+
+But using long stack traces produces
+
+\begin{lstlisting}
+TestError: Unhandled intended testing error
+        at Test.throwError(Test.java:102)
+           *****************************
+           **        ASYNC GAP        **
+           *****************************
+        at Test.asyncThrow(Test.java:98)
+        at Test.pathStep4(Test.java:94)
+        at Test.pathStep3(Test.java:90)
+           *****************************
+           **        ASYNC GAP        **
+           *****************************
+        at Test.asyncExec(Test.java:86)
+        at Test.pathStep2(Test.java:82)
+        at Test.pathStep1(Test.java:78)
+        at Test.test(Test.java:158)
+\end{lstlisting}
+
 
 To implement this, one could attribute a context value to each asynchronous execution containing the stack trace of the code that submitted the asynchronous code. Then on error handling, simply recover the asynchronous stack trace and add it to the caught error.
 
