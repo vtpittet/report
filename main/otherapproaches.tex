@@ -2,11 +2,46 @@
 \chapter{Existing Approaches}
 \label{ch:approaches}
 
-The Zone for Java let you be aware of what you do, at the risk of misinterpreting its features.
+The Zone exists already for Dart and JavaScript. Those frameworks were the inspiration of asynchronous execution context for the Java Zone. Both \zonejs\ and \zonedrt\ define Zone local storage, execution hooks (in the sense of around hook for the Java Zone) and error handling. The error handling includes for both long stack trace generation. \zonejs\ implements the sytematic error handling for its call-back centered structure. \zonedrt\ follows the contextual error handling in its future-based approach.
 
-\section{\zonejs}
+\begin{figure}[h]
+\centering
+\begin{tabular}{| p{0.3\textwidth} | p{0.19\textwidth}  | m{0.19\textwidth} | m{0.2\textwidth} |}
+\hline
+ & \textbf{\zonejs} & \textbf{\zonedrt} & \textbf{Java Zone}
+\\\hline
+\textbf{Multi threaded} & no & no & yes
+\\\hline
+\textbf{Zone local storage} & yes & yes & yes
+\\\hline
+\textbf{Distinction internal-asynchronous hook} & yes & no & yes
+\\\hline
+\textbf{\emph{Around} hooks} & no & yes & yes
+\\\hline
+\textbf{Extensible API} & no & no & yes
+\\\hline
+\textbf{Before, Return, After hooks} & yes & no & plugin 
+\\\hline
+\textbf{Long stack trace} & yes & yes & plugin
+\\\hline
+\textbf{Promises support} & no & yes & plugin
+\\\hline
+\textbf{Crossing mechanism} & no & no & yes
+\\\hline
+\textbf{Out of the box basic tools} & yes & yes & no
+\\\hline
+\textbf{Adaptable to multiple frameworks} & no & no & no
+\\\hline
+\end{tabular}
+\caption{\zonejs, \zonedrt\ and Java Zone comparison}
+\label{fig:zcomp}
+\end{figure}
 
 
+In comparison to \zonejs\ and \zonedrt, the Zone for Java archives greater generality and, in my honest opinion, better founded execution principle. The Zone model gives arguments and a representation to understand how the Java Zone works, by opposition to \zonejs\ and \zonedrt\ who just implement usecases in answer to concrete problems.
 
-\section{\zonedrt}
+Of course, this level of abstraction comes at the cost of increased complexity. For example, to get a long stack trace, one has to make a decision of how he will implement his asynchronous error handling, contextual or systematic~? Then based on his decision, he chooses the correct hooks to add the asynchronous call stack of the Zone into handled errors.
 
+There is an emerging project, driven by StrongLoop, to provide a Zone in the Node.js environment. However it is not an adaptation of \zonejs\ but a new implementation of the Zone, specific for Node.js. In the equivalent situation (see chapter \ref{ch:inpractice}, the integration of the Java Zone into \vertx was almost transparent and required only to develop adaptor code. No Zone functionality were rewritten and all existing specified Zone implementations are directly reusable.
+
+This adaptability of the Java Zone, and its high composability are the main benefits brought by the Java Zone over \zonejs\ and \zonedrt.

@@ -53,7 +53,14 @@ The Zone is intended to provide a context across asynchronous executions. It spe
 
 \section{Model}
 
-As illustrated in figure X -ADD PN FIGURE-, the Zone can be understood as an extension to Perti net that allows to capture the tokens flow.
+As illustrated in figure \ref{fig:zpn}, the Zone can be understood as an extension to Perti net that allows to capture the tokens flow.
+
+\begin{figure}
+  \centering
+  \includegraphics[width=\textwidth]{zone-pn}
+  \caption{Zone on Petri net}
+  \label{fig:zpn}
+\end{figure}
 
 More formally, given a Petri net $PN = (P, T, F)$ with $P$ the set of places, $T$ the set of transitions and $F$ the set of flows from $P$ to $T$ or $T$ to $P$: $F \subseteq (P \times T) \cup (T \times P)$, a Zone $Z$ is a subset $Z \subseteq P$ such that
 
@@ -61,7 +68,14 @@ $$\forall Z_1, Z_2 (Z_1 \cap Z_2 \neq \emptyset) \Rightarrow [(Z_1 \subseteq Z_2
 
 $$\forall Z_1, Z_2 \exists Z_0 \text{ s.t. } Z_1 \subseteq Z_0 \land Z_2 \subseteq Z_0 $$
 
-Which more simply means: there exists a \emph{root} Zone enclosing all Zones and Zones can contain other Zones, but cannot intersect otherwise. -intersection figure-
+Which more simply means: there exists a \emph{root} Zone enclosing all Zones and Zones can contain other Zones, but cannot intersect otherwise (figure \ref{fig:zinter}).
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\textwidth]{zone-intersect}
+  \caption{Zone intersection}
+  \label{fig:zinter}
+\end{figure}
 
 Additionally, the Zone defines key-value bindings that are accessible from any place inside the Zone and crossing hooks that are triggered whenever a token crosses a Zone boundary.
 
@@ -170,9 +184,9 @@ when teh code zoned in new Zone starts, the cross algorithm executes in a very s
 
 \begin{tabular}{| l | l |}
 \hline
-Source Zone & Some Zone \\ \hline
-Destination Zone & New Zone \\ \hline
-Join Zone & Some Zone \\ \hline
+\textbf{Source Zone} & Some Zone \\ \hline
+\textbf{Destination Zone} & New Zone \\ \hline
+\textbf{Join Zone} & Some Zone \\ \hline
 \end{tabular}
 
 Since the join Zone is the source Zone, the left source stack after step 2 is empty. Step 3 of the algorithm has no effect. No cross-out hook is applied, only one cross-in, of the destination Zone, is executed.
@@ -181,9 +195,9 @@ When the code zoned in new Zone ends, the cross algorithm executes in the dual c
 
 \begin{tabular}{| l | l |}
 \hline
-Source Zone & New Zone \\ \hline
-Destination Zone & Some Zone \\ \hline
-Join Zone & Some Zone \\ \hline
+\textbf{Source Zone} & New Zone \\ \hline
+\textbf{Destination Zone} & Some Zone \\ \hline
+\textbf{Join Zone} & Some Zone \\ \hline
 \end{tabular}
 
 The join Zone is still the source Zone, but the left destination stack is emptied by step 2. Step 3 executes one cross out (from the source Zone), step 4 executes no cross In. To summarize, in this case, a cross in is executed when entering the new Zone, a cross out is executed when entering the old Zone. So far, so good.
@@ -214,9 +228,9 @@ When the code zoned in parent (at the point of interest) starts, the cross algor
 
 \begin{tabular}{| l | l |}
 \hline
-Source Zone & Child Zone \\ \hline
-Destination Zone & Parent Zone \\ \hline
-Join Zone & Parent Zone \\ \hline
+\textbf{Source Zone} & Child Zone \\ \hline
+\textbf{Destination Zone} & Parent Zone \\ \hline
+\textbf{Join Zone} & Parent Zone \\ \hline
 \end{tabular}
 
 When entering the Zone, the argument pattern is the same as when ending in the base case. Hence one cross-out will be executed, no cross-in. Reversely, one cross-in and no cross-out is executed when ending in the Zone.
@@ -248,9 +262,9 @@ In this case, child1 and child2 share the same parent but neither is parent of t
 
 \begin{tabular}{| l | l |}
 \hline
-Source Zone & Child 1 Zone \\ \hline
-Destination Zone & Child 2 Zone \\ \hline
-Join Zone & Parent Zone \\ \hline
+\textbf{Source Zone} & Child 1 Zone \\ \hline
+\textbf{Destination Zone} & Child 2 Zone \\ \hline
+\textbf{Join Zone} & Parent Zone \\ \hline
 \end{tabular}
 
 Unlike previous cases, the join Zone is neither the source or the destination Zone. At the beginning of the zoned code, the step 3 triggers one cross-out from child 1, then the step 4 triggers one cross-in to child 2. As intended by the written code, at no point, parent Zone gets crossed in or out. The whole execution is \emph{inside} the parent Zone.
@@ -355,8 +369,14 @@ The crossing hooks are defined by the Zone as function from token to token. Henc
 
 Around hook discussion distinguished the run hooks and asynchronous hooks, but both make the same task. Only their application point differ. That is why they are not distinguished here and aggregated under the term of ``around hook''.
 
-Around hooks are represented as function from zoned task to zoned task, giving the opportunity to surround hooked task with a try-catch block, offering the choice  to execute or not the hooked task and even to run the task in a dynamically created Zone. Moreover, in a Zone, around hooks are inherited from enclosing Zones and gets applied from innermost
-to outermost hook. For example : -- SCHEME--
+Around hooks are represented as function from zoned task to zoned task, giving the opportunity to surround hooked task with a try-catch block, offering the choice  to execute or not the hooked task and even to run the task in a dynamically created Zone. Moreover, in a Zone, around hooks are inherited from enclosing Zones and gets applied from innermost to outermost hook~(figure \ref{fig:around-hook}).
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.7\textwidth]{around-hook}
+  \caption{Around hook}
+  \label{fig:around-hook}
+\end{figure}
 
 \subsection*{Around Hooks Inheritance}
 
@@ -364,17 +384,17 @@ For more flexibility, around hooks are inherited but not repeated. Consider thre
 
 \begin{tabular}{|l|l|l|l|}
 \hline
-Zone & Enclosing Zone & Defined Around run & Applied around run 
+\textbf{Zone} & \textbf{Enclosing Zone} & \textbf{Defined hook} & \textbf{Applied hook}
 \\\hline
-outerZone & None & $f$: Task $\rightarrow$ Task & $f$
+outer Zone & None & $f$: Task $\rightarrow$ Task & $f$
 \\\hline
-middleZone & outerZone & $g$: Task $\rightarrow$ Task & $f \circ g$
+middle Zone & outerZone & $g$: Task $\rightarrow$ Task & $f \circ g$
 \\\hline
-innerZone & middleZone & $f$: Task $\rightarrow$ Task & $f \circ g$
+inner Zone & middleZone & $f$: Task $\rightarrow$ Task & $f \circ g$
 \\\hline
 \end{tabular}
 
-In innerZone, $f$ hook does not get applied one more time, because it would repeat inherited f hook from outerZone. When the same hook is inherited multiple times, the outermost origin determines its application position. In the previous example, innerZone applies $( f \circ g )$ and not $( g \circ f )$ because the outermost origin of $f$ (outerZone) encloses the outermost origin of $g$ (middleZone). This prevents inner Zones from modifying accidentally inherited hooks application order.
+In inner Zone, $f$ hook does not get applied one more time, because it would repeat inherited f hook from outer Zone. When the same hook is inherited multiple times, the outermost origin determines its application position. In the previous example, inner Zone applies $( f \circ g )$ and not $( g \circ f )$ because the outermost origin of $f$ (outer Zone) encloses the outermost origin of $g$ (middle Zone). This prevents inner Zones from modifying accidentally inherited hooks application order.
 
 This inheritance policy is simply more general than a blind straight-forward application of all hooks. It is easy (especially programmatically) to re-create a different instance of a hook with the same functionality to prevent it from being filtered out. On the other hand, given a single function composed of many hooks, it is hard, if not impossible, to filter out repetitions to get this union-inheritance.
 
@@ -391,7 +411,8 @@ ThreadLocal<T> threadLocal = ...
 Executor executor = ...
 
 /*
- * Submitted code will update the thread local on execution.
+ * Submitted code will update
+ * the thread local on execution.
  */
 public void submitWithLocal(Runnable code, T local) {
   Runnable newCode = () -> {
@@ -420,11 +441,154 @@ Chapter \ref{ch:asyncworld} showed that in Java, one cannot assume a single exec
 
 \section{Applications} % Independent chapter ?: Answer to motivation.
 
-At this point, you may wonder if the generalization has gone too far. No error handling, no inherited before hooks, ... I show here how to combine the Zone properties to build up expected features.
+So far, the presented Zone is mostly theoretical. Around and crossing hooks have a precisely defined behavior, but beside Zone local storage, no feature answers the motivations for the Zone. I show here how to combine the Zone properties to build solution the initial problems.
 
-\begin{itemize}
-\item Contextual and asynchronous error Handling
-\item Long stack traces or one Zone per task
-\item Asynchronous Dependency tracing
-\item Simulated inheritance for arbitrary custom properties (like javascript before hook)
-\end{itemize}
+\subsection*{Asynchronous error handling}
+
+Asynchronous error handling exists in two forms, contextual and systematic.
+
+\paragraph{The contextual error handling} consists in using the Zone as a standard try-catch block. The figure \ref{fig:sas-tc} illustrates the parallel between synchronous and asynchronous error handling.
+
+In this example, \lstinline{future = asyncCall()} starts an asynchronous task and return the \lstinline{Future} result of that task. Of course, the task will throw an error. Two cases are considered.
+
+\begin{enumerate}
+\item Access \lstinline{message} inside the \lstinline{ErrorZone}\\
+The error is not handled by the \lstinline{ErrorZone}. Nothing gets printed, since \lstinline{future.get()} synchronously throws its error inside the \lstinline{ErrorZone}.
+\item Access \lstinline{message} outside the \lstinline{ErrorZone}\\
+Upon \lstinline{future.get()}, the result, zoned inside \lstinline{ErrorZone} must cross out the Zone. The error gets handled and a fallback value is provided.
+\end{enumerate}
+
+The \lstinline{ErrorZone} simply has to implement the crossing hook:
+
+\begin{lstlisting}
+/*
+ * Checks if crossing token 'token' is an error token.
+ * If yes, handle the error.
+ */
+public Token crossOut(Token token) {
+  if (token.isErrorToken()) {
+    Token fixed;
+    // error handling ...
+    return fixed;
+  } else {
+    // do nothing
+    return token;
+  }
+}
+\end{lstlisting}
+
+The cross resolution algorithm then accomplishes the work of selecting correct hooks according to the calling context.
+
+\begin{figure}[H]
+\centering
+\makebox[0pt][c]{
+\begin{minipage}[l]{0.6\linewidth}
+\centering
+\begin{lstlisting}
+Future<String> future;^^J
+^^J
+// begin of async try-catch block^^J
+(new ErrorZone()).run(() -> {^^J
+^^J
+\ \ future = asyncCall();^^J
+^^J
+\ \ // (1)^^J
+\ \ String message = future.get();^^J
+\ \ System.out.println(message);^^J
+});^^J
+// end of async try-catch block^^J
+^^J
+// (2)^^J
+String message = future.get();^^J
+System.out.println(message);^^J
+\end{lstlisting}
+\end{minipage}
+
+
+\begin{minipage}[c]{0pt}
+\begin{center}
+\rule{0.4mm}{0.3\textheight}
+\end{center}
+\end{minipage}
+
+\begin{minipage}[r]{0.6\linewidth}
+\centering
+\begin{lstlisting}
+String future;^^J
+^^J
+// begin of sync try-catch bloc^^J
+try {^^J
+^^J
+\ \ message = syncCall();^^J
+^^J
+\ \ // (1)^^J
+\ \ System.out.println(message);^^J
+^^J
+} catch (Error e) { ... }^^J
+// end of sync try-catch block^^J
+^^J
+// (2)^^J
+^^J
+System.out.println(message);^^J
+\end{lstlisting}
+\end{minipage}
+}
+\caption{Asynchronous and synchronous try-catch block}
+\label{fig:sas-tc}
+\end{figure}
+
+\paragraph{Systematic error handling} is an automatization to uniformly wrap asynchronous code \emph{inside} a try-catch block. This can be compared to Java's \lstinline{Thread.UncaughtExceptionHandler} with the differences:
+
+\begin{enumerate}
+\item The code catches the errors \emph{before} some third-party execution service (thread pool for example), preventing the exeuction to reach the \lstinline{Thread.UncaughtExceptionHandler}.
+\item The setting is not global but local to the zoned portion of the code. With \lstinline{Thread.UncaughtExceptionHandler}, one has to carefully set and unset the value.
+\item Many different default exception handler can be easily emitted by the same thread.
+\end{enumerate}
+
+Such behavior is provided by a Zone implementing the asynchronous hook:
+
+\begin{lstlisting}
+// asynchronous hook
+ZonedTask aroundSubmit(ZonedTask task) {
+  return (input) -> {
+    ZonedToken result = task.apply(input);
+    if (result.isErrorToken()) {
+      ZonedToken fallbackValue;
+      //handle logic, compute fallbackValue
+      return fallbackValue;
+    } else {
+      return result;
+    }
+  };
+}
+\end{lstlisting}
+
+Since around hooks completely apply before crossing out the Zone, cross-out based error handling does not interfere with this code.
+
+\subsection*{One Zone per asynchronous task}
+
+This is not a direct solution to one problem of chapter \ref{ch:motivs}, but an intermediate tool to build other features. The idea is simple. Use an asynchronous hook to bind submitted task inside a new Zone.
+
+\begin{lstlisting}
+ZonedTask aroundSubmit(ZonedTask task) {
+  Zone newZone = new ZoneX();
+  ZonedTask newTask = newZone.bind(task);
+  return newTask;
+}
+\end{lstlisting}
+
+\lstinline{ZoneX} can be any Zone implementation, with the single constraint that it should override the internal hook application mechanism to do nothing. Otherwise, \lstinline{newTask} may apply unexpected internal hooks, inherited by enclosing Zones. The problem is that any \emph{internal} hooks will be also applied where \emph{asynchronous} hooks are.
+
+\subsection*{Long stack traces}
+
+Implementation of long stack traces use one Zone per asynchronous task to set a Zone value containing the call stack trace of the asynchronous task. With contextual error handling, it simply defines an asynchronous hook to run submitted code inside a new Zone that:
+\begin{enumerate}
+\item Stores as Zone local value the stack trace at the asynchronous submission.
+\item Wraps zoned code inside a try-catch block to catch any error, append stored stack trace and re-throw it.
+\end{enumerate}
+
+Long stack traces are also possible with systematic error handling, but require heavier mechanisms to ensure that the stack trace is always updated before being caught by the \lstinline{catch} clauses of error handling.
+
+\subsection*{Asynchronous dependency tracing}
+
+Chapter \ref{ch:inpractice} discusses in details asynchronous dependency tracking as a concrete experiment. The principle is however simple. Use one Zone per asynchronous task with IDs and implement a crossing hook to store the transitions from one Zone to another one to some data structure of your choice. One Zone per task creates a one-to-one correspondance between asynchronous tasks and IDs, the crossing hook detects and stores execution dependencies between two IDs.
