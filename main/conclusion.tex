@@ -2,12 +2,6 @@
 \chapter{Conclusion}
 \label{ch:conclusion}
 
-
-Addon elements:
-\begin{itemize}
-\item - cannot see os-based preemption (timing error, false execution, ...)
-\end{itemize}
-
 We have seen that the Zone for Java brings you innovative building tools. The integration work may be a little complex (as showed the \vertx\ case study), but once this is correctly done, one can almost transparently rely on the Zone as uniform context. In summary, the Zone needs:
 \begin{itemize}
 \item Explicit binding to asynchronous tasks submitted to the framework.
@@ -17,7 +11,7 @@ In return, it brings:
 \begin{itemize}
 \item Persistent context over asynchronous transitions.
 \item Modeled execution flow between Zones
-\item Flexible programmatic hooks on
+\item Flexible programmatic hooks on:
   \begin{itemize}
   \item Zone binding and execution.
   \item Asynchronous submission and execution.
@@ -26,16 +20,16 @@ In return, it brings:
 \item Extensible and reusable structure.
 \end{itemize}
 
-As a conclusion, I'll show three ways of research and development that can follow the Zone followed by the evolution of point of interest through the research.
+To close this work, I'll show three ways of research and development on the Zone and a small analysis of how the original problematic evolued through the research.
 
 \section{Development}
 
-\begin{itemize}
-\item Easier binding primitives, esp. extending api to each java fun interface.
-\item Scope projection
-\item Zone stack manipulation (now rely on ad-hoc convenient hacks)
-\item Buildable API, an extensible DLS to build Zones
-\end{itemize}
+Bringing more and easier binding primitives would be very interesting. Even though the binding principle is detailed, the implementation is still not general. This is mainly due to the large amount of standard interfaces present in the \lstinline{java.util.function} package that represent the Zone's task abstraction. Actually, the Zone only handles \lstinline{BiFunction} and requires additional wrap-steps to bind another interface, as \lstinline{Runnable} for example.
+
+When using and probing the Zone, I oftenly encountered the need to ignore parts of the Zone stack. The union-inheritance
+
+The scope projection is one solution to theorize and specify the Zone stack manipulation
+
 
 \section{Theory}
 
