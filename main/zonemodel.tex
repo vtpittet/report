@@ -287,7 +287,8 @@ Zone myZone = ...
 
 myZone.run(() -> {
   // code enclosed in this block is 'zoned' and
-  // hooked as internal execution by the 'run hook' of myZone
+  // hooked as internal execution
+  // by the 'run hook' of myZone
 });
 \end{lstlisting}
 
@@ -303,8 +304,9 @@ myZone.run(() -> {
   // inside myZone
 
   myExecutor.execute(() -> {
-    // code enclosed in this block is still zoned in myZone
-    // it is hooked as asynchronous submission by the 'async hook' of myZone
+    // code enclosed here is still zoned in myZone and
+    // hooked as asynchronous submission
+    // by the 'async hook' of myZone
   });
   
 });
