@@ -3,21 +3,21 @@
 \label{ch:apps}
 
 
-So far, the presented Zone is mostly theoretical. Around and crossing hooks have a precisely defined behavior, but beside Zone local storage, no feature answers the motivations for the Zone. I show here how to combine the Zone properties to build solution the initial problems.
+So far, the presented Zone is mostly theoretical. Around and crossing hooks have a precisely defined behavior, but beside Zone local storage, no feature answers the motivations for the Zone. I show here how to combine the Zone properties to build solutions to the initial problems.
 
-\section{Asynchronous error handling}
+\section{Asynchronous Error Handling}
 
 Asynchronous error handling exists in two forms, contextual and systematic.
 
-\paragraph{The contextual error handling} consists in using the Zone as a standard try-catch block. The figure \ref{fig:sas-tc} illustrates the parallel between synchronous and asynchronous error handling.
+\paragraph{The contextual error handling} consists in using the Zone as a standard try-catch block. The figure \ref{fig:sas-tc} illustrates the parallel between synchronous and contextual error handling.
 
-In this example, \lstinline{future = asyncCall()} starts an asynchronous task and return the \lstinline{Future} result of that task. Of course, the task will throw an error. Two cases are considered.
+In this example, \lstinline{future = asyncCall()} starts an asynchronous task and returns the \lstinline{Future} result of that task. Of course, the task will throw an error. Two cases are considered.
 
 \begin{enumerate}
 \item Access \lstinline{message} inside the \lstinline{ErrorZone}\\
 The error is not handled by the \lstinline{ErrorZone}. Nothing gets printed, since \lstinline{future.get()} synchronously throws its error inside the \lstinline{ErrorZone}.
 \item Access \lstinline{message} outside the \lstinline{ErrorZone}\\
-Upon \lstinline{future.get()}, the result, zoned inside \lstinline{ErrorZone} must cross out the Zone. The error gets handled and a fallback value is provided.
+Upon \lstinline{future.get()}, the result, zoned inside \lstinline{ErrorZone} must cross out the Zone. The error gets handled and a fall-back value is provided.
 \end{enumerate}
 
 The \lstinline{ErrorZone} simply has to implement the crossing hook:
@@ -29,9 +29,9 @@ The \lstinline{ErrorZone} simply has to implement the crossing hook:
  */
 public Token crossOut(Token token) {
   if (token.isErrorToken()) {
-    Token fixed;
+    Token fallback;
     // error handling ...
-    return fixed;
+    return fallback;
   } else {
     // do nothing
     return token;
@@ -99,10 +99,10 @@ System.out.println(message);^^J
 \label{fig:sas-tc}
 \end{figure}
 
-\paragraph{Systematic error handling} is an automatization to uniformly wrap asynchronous code \emph{inside} a try-catch block. This can be compared to Java's \lstinline{Thread.UncaughtExceptionHandler} with the differences:
+\paragraph{Systematic error handling} is an automation to uniformly wrap asynchronous code \emph{inside} a try-catch block. This can be compared to Java's \lstinline{Thread.UncaughtExceptionHandler} with the differences:
 
 \begin{enumerate}
-\item The code catches the errors \emph{before} some third-party execution service (thread pool for example), preventing the exeuction to reach the \lstinline{Thread.UncaughtExceptionHandler}.
+\item The code catches the errors \emph{before} some third-party execution service (a thread pool for example), preventing the execution to reach the \lstinline{Thread.UncaughtExceptionHandler}.
 \item The setting is not global but local to the zoned portion of the code. With \lstinline{Thread.UncaughtExceptionHandler}, one has to carefully set and unset the value.
 \item Many different default exception handler can be easily emitted by the same thread.
 \end{enumerate}
@@ -110,14 +110,14 @@ System.out.println(message);^^J
 Such behavior is provided by a Zone implementing the asynchronous hook:
 
 \begin{lstlisting}
-// asynchronous hook
-ZonedTask aroundSubmit(ZonedTask task) {
+
+ZonedTask asyncHook(ZonedTask task) {
   return (input) -> {
     ZonedToken result = task.apply(input);
     if (result.isErrorToken()) {
-      ZonedToken fallbackValue;
+      ZonedToken fallback;
       //handle logic, compute fallbackValue
-      return fallbackValue;
+      return fallback;
     } else {
       return result;
     }
@@ -127,7 +127,7 @@ ZonedTask aroundSubmit(ZonedTask task) {
 
 Since around hooks completely apply before crossing out the Zone, cross-out based error handling does not interfere with this code.
 
-\section{One Zone per asynchronous task}
+\section{One Zone Per Asynchronous Task}
 
 This is not a direct solution to one problem of chapter \ref{ch:motiv}, but an intermediate tool to build other features. The idea is simple. Use an asynchronous hook to bind submitted task inside a new Zone.
 
@@ -141,16 +141,16 @@ ZonedTask aroundSubmit(ZonedTask task) {
 
 \lstinline{ZoneX} can be any Zone implementation, with the single constraint that it should override the internal hook application mechanism to do nothing. Otherwise, \lstinline{newTask} may apply unexpected internal hooks, inherited by enclosing Zones. The problem is that any \emph{internal} hooks will be also applied where \emph{asynchronous} hooks are.
 
-\section{Long stack traces}
+\section{Long Stack Traces}
 
 Implementation of long stack traces use one Zone per asynchronous task to set a Zone value containing the call stack trace of the asynchronous task. With contextual error handling, it simply defines an asynchronous hook to run submitted code inside a new Zone that:
 \begin{enumerate}
 \item Stores as Zone local value the stack trace at the asynchronous submission.
-\item Wraps zoned code inside a try-catch block to catch any error, append stored stack trace and re-throw it.
+\item Wraps internal code inside a try-catch block to catch any error, extend it with the stored stack trace and re-throw it.
 \end{enumerate}
 
-Long stack traces are also possible with systematic error handling, but require heavier mechanisms to ensure that the stack trace is always updated before being caught by the \lstinline{catch} clauses of error handling.
+Long stack traces are also possible with systematic error handling, but require heavier mechanisms to ensure that the stack trace is always updated before being caught by the \lstinline{catch} clauses of the error handling.
 
-\section{Asynchronous dependency tracing}
+\section{Asynchronous Dependency Tracing}
 
-Chapter \ref{ch:inpractice} discusses in details asynchronous dependency tracking as a concrete experiment. The principle is however simple. Use one Zone per asynchronous task with IDs and implement a crossing hook to store the transitions from one Zone to another one to some data structure of your choice. One Zone per task creates a one-to-one correspondance between asynchronous tasks and IDs, the crossing hook detects and stores execution dependencies between two IDs.
+Chapter \ref{ch:inpractice} discusses in details asynchronous dependency tracking as a concrete experiment. The principle is however simple. Use one Zone per asynchronous task with IDs and implement a crossing hook to store the transitions from one Zone to another one to some data structure of your choice. One Zone per task creates a one-to-one correspondence between asynchronous tasks and IDs, the crossing hook detects and stores execution dependencies between two IDs.
