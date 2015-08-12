@@ -1,15 +1,17 @@
 \begin{abstract}
 
 %purpose
-Provide an asynchronous context to solve most common problems and needs encountered when coding asynchronous programs. The final form is a Zone framework for Java. This tool is able of 
-
+This work aims to provide an asynchronous \emph{context} to solve the most common problems and encountered needs when coding an asynchronous program. This \emph{context} includes support for local values definition, asynchronous error catching, hooks into the asynchronous executions and primitives to build specialized features on asynchronous transitions.
+\\
+\\
 %method
-Analysis of existing async frameworks
-Understand and grasp the problems,
-Theorize a general solution
-
+The first step consits in analysing the existing frameworks for asynchronous execution to determine the environements in which the code has to work.
+Then, a study of encountered challenges with asynchronous programming leads to a general solution, able to support building of refined behaviors.
+Finally the implementation is integrated and tested on a real-world execution framework.
+\\
+\\
 %scope
-no concurrency but asynchrony
-The developped solution takes inspiration from the \zonejs and \zonedrt frameworks
+The developed solution addresses asynchrony concerns, but not concurrency.
+It takes inspiration from the \zonejs\ and \zonedrt\ frameworks and build a similar concept for Java. It implements required functionalites and specifies how to incorporate it into execution frameworks. \vertx\ is used as case study to show concrete use cases and how the integration is realized.
 
 \end{abstract}
