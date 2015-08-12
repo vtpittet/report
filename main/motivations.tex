@@ -22,10 +22,10 @@ public void test() {
 }
 \end{lstlisting}
 
-In synchronous code, there is no problem and everything runs with expected environment. Suppose now you need to improve performance. You change the method \lstinline{doCriticalStuff()} code to run asynchronously and forget to care about \lstinline{environment}. It's very likely that \lstinline{doCriticalStuff()} will run in a bad environment since it may execute \emph{after} \lstinline{environment} is modified.
+In synchronous execution, there is no problem and everything runs with the expected environment. Suppose now you need to improve performance. You change the method \lstinline{doCriticalStuff()} code to run asynchronously and forget to care about \lstinline{environment}. It's very likely that \lstinline{doCriticalStuff()} will run in a wrong environment since it may execute \emph{after} \lstinline{environment} is modified.
 
 
-This problem can be solved if we use a context persisting across asynchronous transitions to keep the environment value.
+This problem can be solved if we represent \lstinline{environment} as a context persisting across asynchronous transitions.
 
 
 \section{Error Handling}
@@ -46,11 +46,11 @@ public void test(int input) {
 
 Again, as long as the code is synchronous there is no problem with the try-catch block. Once you decide to run asynchronously \lstinline{heavyMathFunction(int)} to avoid application freeze, the code may not handle (or even see) a runtime error.
 
-A solution to this problem needs ways to keep error handler across asynchronous transitions or report asynchronous error to wrapping error handler.
+A solution to this problem needs ways to keep error handler across asynchronous transitions or report asynchronous error to the wrapping error handler.
 
 \section{Error Tracing}
 
-Suppose now asynchronous error are caught, debugging unexpected errors is still hard since the stack trace only goes back to the beginning of asynchronous execution. If the cause of the error precedes the asynchronous code submission, nothing can track it back.
+Suppose now asynchronous error are caught, debugging unexpected errors is still hard. The stack trace only goes back to the beginning of asynchronous execution. If the cause of the error precedes the asynchronous code submission, nothing can track it back.
 
 \begin{lstlisting}
 public void test() {
@@ -69,11 +69,15 @@ public void test() {
 }
 \end{lstlisting}
 
-During execution, one error pops up, saying that the asynchronous batch got a bad input. It only indicates that somewhere in the code, \lstinline{startAsyncBatch(int)} was called with an invalid input. Imagine the stack trace going back before asynchronous execution. Finding the bug's origin is now a triviality. 
+During execution, one error pops up, saying that the asynchronous batch got a bad input. It only indicates that somewhere in the code, \lstinline{startAsyncBatch(int)} was called with an invalid argument. Imagine the stack trace going back before asynchronous execution. Finding the bug's origin is now a triviality. 
 
 As illustration, consider this test code.
 
 \begin{lstlisting}
+public void test() {
+  pathStep1();
+}
+
 private void pathStep1() {
   pathStep2();
 }
@@ -119,15 +123,15 @@ TestError: Unhandled intended testing error
 \end{lstlisting}
 
 
-To implement this, one could attribute a context value to each asynchronous execution containing the stack trace of the code that submitted the asynchronous code. Then on error handling, simply recover the asynchronous stack trace and add it to the caught error.
+To implement this, one could attribute a contextual value to each asynchronous execution containing the stack trace of the code that submitted the asynchronous code. Then, on error handling, simply recover the asynchronous stack trace and add it to the caught error.
 
 \section{Dependencies Tracking}
 
-When asynchronous programs gets large, ordering and dependencies among tasks can be the source of complex bugs. To solve them, we cruelly lack a tool and a representation to visualize how an execution did really happen. This can be done at a very fine level, collecting the exact time at which each task gets started and finished. A more useful approach would be to collect only events when a task uses output of another task to create a dependency graph.
+When asynchronous programs gets large, ordering and dependencies among tasks can be the source of complex bugs. To solve them, we cruelly lack tools and representations to visualize how an execution did really happen. This can be done at a very fine level, collecting the exact time at which each task gets started and finished. A more useful approach is to collect only events where a task uses output of another task to create a dependency graph.
 
-Implementing such collection would be very cumbersome: each asynchronous task needs modification. Missing one results in a bug. Modifying each task results in code pollution and duplication. Trying to simplify the implementation by hooking underlying structures (for instance Java threads) does not work, since no one directly uses threads in his application, but rely on more efficient executors, as thread pools. Threads are only dumb workers and have not the ability to look at different tasks they execute.
+Naively implementing such collection would be very cumbersome: each asynchronous task needs modification. Missing one of them results in a bug. Modifying each task results in code pollution and duplication. Trying to simplify the implementation by hooking underlying structures (for instance Java threads) does not work, since no one directly uses threads in his application, but rely on more efficient executors, as thread pools. Threads are only dumb workers and have not the ability to look at different tasks they execute.
 
-But a tool that achieve to automatically bind each asynchronous code to a context and capture transitions between these contexts can trivially collect dependencies among asynchronous tasks and export a graphical representation of it, under the form of a directed graph for example.
+But a tool that achieve to automatically bind each asynchronous code to a context and capture transitions between these contexts can trivially collect dependencies among asynchronous tasks and export a graphical representation, under the form of a directed graph for example. This solution is detailed in chapter \ref{ch:inpractice}.
 
 \section{Task Profiling}
 
@@ -150,5 +154,5 @@ public void test() {
 }
 \end{lstlisting}
 
-Using right tools and abstractions for asynchronous tracing can make it easy to implement such profiling. In this case, a context that can define the ``timer code'' in the form of a hook around asynchronous execution is one solution. Then one simply has to wait for complete execution of all sub tasks, collect all individual times from all sub-contexts and sum them to get the precise result.
+Using right tools and abstractions for asynchronous tracing can make it easy to implement such profiling. In this case, a context that defines the ``timer code'' in the form of a hook around asynchronous execution is one solution. Then one simply has to wait for complete execution of all sub tasks, collect all individual times from all sub-contexts and sum them to get the precise result.
 
