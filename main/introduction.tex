@@ -4,14 +4,14 @@
 
 Who never faced the challenge of debugging an asynchronous program ? And even the somewhat simpler task of following its execution and understanding its dependencies is neither easy, as illustrated in chapter \ref{ch:motiv}.
 
-The main reason of this difficulty is that our standard representations assume determinism and do not hold anymore with the non-deterministic brought by asynchronousness.
+The main reason of this difficulty is that our standard representations assume determinism and do not hold anymore with the non-determinism brought by the asynchrony.
 However, this non-determinism is precisely what we search when using asynchronous constructs:~there is no way to bypass this problematic.
 
-I propose a solution (chapter \ref{ch:zone}) inspired by the \zonejs\ and \zonedrt\ frameworks to implement functionalities that behave \emph{uniformly} in both synchronous and asynchronous contexts. Moreover this solution aims to be applicable to any underlying asynchronous implementation, at least the most common ones, presented in chapter \ref{ch:asyncworld}. Chapter \ref{ch:approaches} shows how, unlike \zonejs\ and \zonedrt, the Zone for Java implements primitive features, allowing to compose almost any other functionality. This way, it steps down central features as error handling or asynchronous execution tracing to a standard Zone plug-in. It also allows great evolutive flexibility to add aspects fulfilling needs discovered later.
+I propose a solution (chapter \ref{ch:zone}) inspired by the \zonejs\ and \zonedrt\ frameworks to implement functionalities that behave \emph{uniformly} in both synchronous and asynchronous contexts. Moreover this solution aims to be applicable to any underlying asynchronous implementation, at least the most common ones presented in chapter \ref{ch:asyncworld}. Chapter \ref{ch:approaches} shows how, unlike \zonejs\ and \zonedrt, the Zone for Java implements primitive features, allowing to compose almost any other functionality. This way, the Zone steps down central features as error handling or asynchronous execution tracing to a standard Zone plug-in. It also allows a great flexibility to add aspects fulfilling needs discovered later.
 
-Practical experiments (chapter \ref{ch:inpractice}) built on top of the Zone showed how they allow modularization of complex properties, for example tracing each asynchronous transition of the program. On the other hand, integrating the Zone in an execution framework is hard (consider many cases, avoid duplicate binding), but this work must be done once. After that, use the instrumented executor and zones will be bound transparently.
+Practical experiments (chapter \ref{ch:inpractice}) built on top of the Zone showed how it supports modularization of complex properties, for example tracing each asynchronous transition of the program. On the other hand, integrating the Zone in an execution framework is hard (consider many cases, avoid duplicate binding), but this work must be done once. Then, use the instrumented executor and Zones will work transparently on any program using that framework.
 
-The Zone is an innovative tool in that it addresses the problem of implementing uniform behaviors across context transitions, regardless of the synchronousness. The Zone allows you to think in terms of transitions between asynchronous tasks and simply implement those transitions once, at a single place.
+The Zone is an innovative tool in that it addresses the problem of implementing uniform behaviors across context transitions, regardless of the synchrony. The Zone allows you to think in terms of transitions between asynchronous tasks and simply implement those transitions once, at a single place.
 
 
 
