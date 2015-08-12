@@ -2,7 +2,7 @@
 \chapter{Existing Approaches}
 \label{ch:approaches}
 
-The Zone exists already for Dart and JavaScript. Those frameworks were the inspiration of asynchronous execution context for the Java Zone. Both \zonejs\ and \zonedrt\ define Zone local storage, execution hooks (in the sense of around hook for the Java Zone) and error handling. The error handling includes for both long stack trace generation. \zonejs\ implements the sytematic error handling for its call-back centered structure. \zonedrt\ follows the contextual error handling in its future-based approach.
+The Zone exists already for Dart and JavaScript. Those frameworks were the inspiration of asynchronous execution context for the Java Zone. Both \zonejs\ and \zonedrt\ define Zone local storage, execution hooks (in the sense of around hook for the Java Zone) and error handling. The error handling includes for both long stack trace generation. \zonejs\ implements the systematic error handling for its call-back centered structure. \zonedrt\ follows the contextual error handling in its future-based approach.
 
 \begin{figure}[h]
 \centering
@@ -20,11 +20,11 @@ The Zone exists already for Dart and JavaScript. Those frameworks were the inspi
 \\\hline
 \textbf{Extensible API} & no & no & yes
 \\\hline
-\textbf{Before, Return, After hooks} & yes & no & plugin 
+\textbf{Before, Return, After hooks} & yes & no & plug-in 
 \\\hline
-\textbf{Long stack trace} & yes & yes & plugin
+\textbf{Long stack trace} & yes & yes & plug-in
 \\\hline
-\textbf{Promises support} & no & yes & plugin
+\textbf{Promises support} & no & yes & plug-in
 \\\hline
 \textbf{Crossing mechanism} & no & no & yes
 \\\hline
@@ -38,10 +38,10 @@ The Zone exists already for Dart and JavaScript. Those frameworks were the inspi
 \end{figure}
 
 
-In comparison to \zonejs\ and \zonedrt, the Zone for Java archives greater generality and, in my honest opinion, better founded execution principle. The Zone model gives arguments and a representation to understand how the Java Zone works, by opposition to \zonejs\ and \zonedrt\ who just implement usecases in answer to concrete problems.
+In comparison to \zonejs\ and \zonedrt, the Zone for Java archives greater generality and, in my honest opinion, better founded execution principle. The Zone model gives arguments and a representation to understand how the Java Zone works, by opposition to \zonejs\ and \zonedrt\ who just implement use cases in answer to concrete problems.
 
-Of course, this level of abstraction comes at the cost of increased complexity. For example, to get a long stack trace, one has to make a decision of how he will implement his asynchronous error handling, contextual or systematic~? Then based on his decision, he chooses the correct hooks to add the asynchronous call stack of the Zone into handled errors.
+Of course, this level of abstraction comes at the cost of increased complexity. For example, to get a long stack trace, one has to make a decision of how he will implement his asynchronous error handling: contextual or systematic~? Then based on his decision, he chooses the correct hooks to add the asynchronous stack trace of the Zone into handled errors.
 
-There is an emerging project, driven by StrongLoop, to provide a Zone in the Node.js environment. However it is not an adaptation of \zonejs\ but a new implementation of the Zone, specific for Node.js. In the equivalent situation (see chapter \ref{ch:inpractice}, the integration of the Java Zone into \vertx was almost transparent and required only to develop adaptor code. No Zone functionality were rewritten and all existing specified Zone implementations are directly reusable.
+There is an emerging project, driven by StrongLoop, to provide a Zone in the Node.js environment. However it is not an adaptation of \zonejs\ but a new implementation of the Zone, specific for Node.js. In the equivalent situation (see chapter \ref{ch:inpractice}), the integration of the Java Zone into \vertx\ was almost transparent and required only to develop adapter code. No Zone functionality were rewritten and all existing specified Zone implementations are directly reusable.
 
 This adaptability of the Java Zone, and its high composability are the main benefits brought by the Java Zone over \zonejs\ and \zonedrt.
