@@ -20,17 +20,17 @@ The Zone exists already for Dart and JavaScript. Those frameworks were the inspi
 \\\hline
 \textbf{Extensible API} & no & no & yes
 \\\hline
-\textbf{Before, Return, After hooks} & yes & no & plug-in 
+\textbf{Before, Return, After hooks} & yes & no & buildable
 \\\hline
-\textbf{Long stack trace} & yes & yes & plug-in
+\textbf{Long stack trace} & yes & yes & buildable
 \\\hline
-\textbf{Promises support} & no & yes & plug-in
+\textbf{Promises support} & no & yes & buildable
 \\\hline
 \textbf{Crossing mechanism} & no & no & yes
 \\\hline
 \textbf{Out of the box basic tools} & yes & yes & no
 \\\hline
-\textbf{Adaptable to multiple frameworks} & no & no & no
+\textbf{Adaptable to multiple frameworks} & no & no & yes
 \\\hline
 \end{tabular}
 \caption{\zonejs, \zonedrt\ and Java Zone comparison}
@@ -40,7 +40,7 @@ The Zone exists already for Dart and JavaScript. Those frameworks were the inspi
 
 In comparison to \zonejs\ and \zonedrt, the Zone for Java archives greater generality and, in my honest opinion, better founded execution principle. The Zone model gives arguments and a representation to understand how the Java Zone works, by opposition to \zonejs\ and \zonedrt\ who just implement use cases in answer to concrete problems.
 
-Of course, this level of abstraction comes at the cost of increased complexity. For example, to get a long stack trace, one has to make a decision of how he will implement his asynchronous error handling: contextual or systematic~? Then based on his decision, he chooses the correct hooks to add the asynchronous stack trace of the Zone into handled errors.
+Of course, this level of abstraction comes at the cost of increased complexity. For example, to get a long stack trace, one has to make a decision of how he will implement his asynchronous error handling: contextual or systematic? Then based on his decision, he chooses the correct hooks to add the asynchronous stack trace of the Zone into handled errors.
 
 There is an emerging project, driven by StrongLoop, to provide a Zone in the Node.js environment. However it is not an adaptation of \zonejs\ but a new implementation of the Zone, specific for Node.js. In the equivalent situation (see chapter \ref{ch:inpractice}), the integration of the Java Zone into \vertx\ was almost transparent and required only to develop adapter code. No Zone functionality were rewritten and all existing specified Zone implementations are directly reusable.
 

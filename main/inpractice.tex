@@ -15,7 +15,7 @@ This chapter shows two experiments and their results of an advanced use of the Z
 \item Dependencies are represented as directed edges between the corresponding nodes of their tasks.
 \end{itemize}
 
-The produced graph is a directed acyclic graph where each node represents an autonomous part of the programs and the edges show the precedences between those parts.
+The produced graph is a directed acyclic graph where each node represents an autonomous part of the programs and the edges show the precedencies between those parts.
 
 \paragraph{The realization} is then pretty easy using the Zone. As evoked in chapter \ref{ch:apps}, use the one Zone per task pattern, creating \lstinline{TaskZone}s. Each \lstinline{TaskZone} stores a unique task ID and defines the crossing hook: 
 

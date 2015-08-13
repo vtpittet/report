@@ -2,7 +2,7 @@
 \chapter{Conclusion}
 \label{ch:conclusion}
 
-We have seen that the Zone for Java brings you innovative building tools. The integration work may be a little complex (as showed the \vertx\ case study), but once this is correctly done, one can almost transparently rely on the Zone as an uniform execution context. In summary, the Zone needs:
+We have seen that the Zone for Java brings you innovative building tools. The integration work may be a little complex (as showed the \vertx\ case study), but once this is correctly done, one can almost transparently rely on the Zone as a uniform execution context. In summary, the Zone needs:
 \begin{itemize}
 \item Explicit binding to asynchronous tasks submitted to the framework.
 \end{itemize}
@@ -44,8 +44,8 @@ An additional performance analysis will help to understand the cost of using the
 
 \section{Asynchronous problematic}
 
-It was interesting to see how the central problematic evolved in the course of the development. At first, I was focused on creating a working implementation with hooks, with error handling, with values, and all other requirements to solve the asynchronous problems. Quickly, I realized that I was only treating the symptoms of the problem and started to look for analogies of all these different solutions. Is there an essential problem and an unique solution, on which all other specific properties can be realized~?
+It was interesting to see how the central problematic evolved in the course of the development. At first, I was focused on creating a working implementation with hooks, with error handling, with values, and all other requirements to solve the asynchronous problems. Quickly, I realized that I was only treating the symptoms of the problem and started to look for analogies of all these different solutions. Is there an essential problem and a unique solution, on which all other specific properties can be realized?
 
-Trying to answer that question, I found out that the real need is an \emph{uniform execution principle}, constant in both synchronous and asynchronous transitions. This gave birth to the crossing principle that I successfully used to implement specialized abilities on the Zone.
+Trying to answer that question, I found out that the real need is a \emph{uniform execution principle}, constant in both synchronous and asynchronous transitions. This gave birth to the crossing principle that I successfully used to implement specialized abilities on the Zone.
 
-With these words, we can conclude that the real need to correctly deal with the asynchronous programming is not an overpowered framework with lots of features and incredible refinement to distinguish addressed cases. The real point is to find a simple representation to think about synchronous and asynchronous executions in an \emph{uniform} way.
+With these words, we can conclude that the real need to correctly deal with the asynchronous programming is not an overpowered framework with lots of features and incredible refinement to distinguish addressed cases. The real point is to find a simple representation to think about synchronous and asynchronous executions in a \emph{uniform} way.

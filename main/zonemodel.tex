@@ -49,9 +49,9 @@ In order to ease further discussion and presentation of the Zone, this section g
 
 \paragraph{Task} represents the very general concept of ``something the program has to do''. More formally, a task is a procedure with some input and zero or one output. For example, \lstinline{Runnable} is a task with no input, no output. A method call is a task with method's arguments as input and method's return value as output.
 
-\paragraph{Zoned Token} A zoned token is a tuple containing a token with its origin Zone. Zoned tokens are used as input to the cross resolution algorithm (see cross resolution section).
+\paragraph{Zoned Token} is a tuple containing a token with its origin Zone. Zoned tokens are used as input to the cross resolution algorithm (see cross resolution section).
 
-\paragraph{Zoned Task} A zoned Task is the result of binding a task to a Zone. A Zoned task behaves like a task but accepts and return only zoned tokens. For instance a task expressed in Java by
+\paragraph{Zoned Task} is the result of binding a task to a Zone. A Zoned task behaves like a task but accepts and return only zoned tokens. For instance a task expressed in Java by
 \begin{lstlisting}
 Function<T, U> task;
 \end{lstlisting}
@@ -192,7 +192,7 @@ When the code zoned in new Zone ends, the cross algorithm executes in the dual c
 \\ \hline
 \end{tabular}
 
-The join Zone is still the source Zone, but the left destination stack is emptied by step 2. Step 3 executes one cross out (from the source Zone), step 4 executes no cross In. To summarize, in this case, a cross in is executed when entering the new Zone, a cross out is executed when entering the old Zone. So far, so good.
+The join Zone is still the source Zone, but the left destination stack is emptied by step 2. Step 3 executes one cross out (from the source Zone), step 4 executes no cross-in. To summarize, in this case, a cross in is executed when entering the new Zone, a cross out is executed when entering the old Zone. So far, so good.
 
 \subsection*{Running in parent Zone from child Zone}
 
@@ -216,7 +216,7 @@ parent.run(() -> {
 });
 \end{lstlisting}
 
-When the code zoned in parent (at the point of interest) starts, the cross algorithm executes with the opposite configuration as the base case :
+When the code zoned in parent (at the point of interest) starts, the cross algorithm executes with the opposite configuration as the base case:
 
 \begin{tabular}{| l | l |}
 \hline
@@ -265,14 +265,13 @@ In this case, \lstinline{child1} and \lstinline{child2} share the same parent bu
 \\ \hline
 \end{tabular}
 
-Unlike previous cases, the join Zone is neither the source or the destination Zone. At the beginning of the zoned code, the step 3 triggers one cross-out from child 1, then the step 4 triggers one cross-in to child 2. As intended by the written code, at no point, parent Zone gets crossed in or out. The whole execution happens \emph{inside} the parent Zone.
+Unlike previous cases, the join Zone is neither the source nor the destination Zone. At the beginning of the zoned code, the step 3 triggers one cross-out from child 1, then the step 4 triggers one cross-in to child 2. As intended by the written code, at no point, parent Zone gets crossed in or out. The whole execution happens \emph{inside} the parent Zone.
 
 \section{Task Binding}
 
 This section presents how Zones and tasks interact. Specifically, what makes a task \emph{zoned} and how to bind a task to a Zone.
 
-A zoned task has contextual access to the current Zone. At any point of its execution in a Zone, a task must be able to refer to that Zone. This reference gives
-access to the Zone local values.
+A zoned task has contextual access to the current Zone. At any point of its execution in a Zone, a task must be able to refer to that Zone. This reference gives access to the Zone local values.
 
 The context of a zoned task persists asynchronously. If an asynchronous task is started from a Zone, it must keep contextual access to that Zone.
 
@@ -312,7 +311,7 @@ myZone.run(() -> {
 
 \subsection*{Internal Binding}
 
-The internal binding and execution of a task follow six steps :
+The internal binding and execution of a task follow six steps:
 \begin{enumerate}
 \item Task is bound to the Zone, run hooks are applied.
 \item The current Zone reference is updated to the Zone of execution.
@@ -330,7 +329,7 @@ The asynchronous binding and execution is quite different from the internal one.
 \item An asynchronously zoned task output may be used in another Zone (hence causing crossing hook operations)
 \end{enumerate}
 
-Since the crossing resolution is done on use-site, it takes into account its specific execution context :
+Since the crossing resolution is done on use-site, it takes into account its specific execution context:
 \begin{enumerate}
 \item An input coming from the same Zone does not trigger any cross operation.
 \item An input coming from a parent Zone crosses inside the child Zone.
@@ -385,7 +384,7 @@ public <T, U> ZonedTask<T, U> internHook(
         ZonedTask<T, U> zTask);
 \end{lstlisting}
 
-This gives the opportunity to surround hooked task with a try-catch block, offers the choice  to execute or not the hooked task and even to run the task in a dynamically created Zone. Moreover, in a Zone, around hooks are inherited from enclosing Zones and applied from innermost to outermost hook~(figure~\ref{fig:around-hook}).
+This gives the opportunity to surround hooked task with a try-catch block, offers the choice to execute or not the hooked task and even to run the task in a dynamically created Zone. Moreover, in a Zone, around hooks are inherited from enclosing Zones and applied from innermost to outermost hook~(figure~\ref{fig:around-hook}).
 
 \begin{figure}[h]
   \centering
@@ -396,7 +395,7 @@ This gives the opportunity to surround hooked task with a try-catch block, offer
 
 \subsection*{Around Hooks Inheritance}
 
-For more flexibility, around hooks are inherited but not repeated. Consider three zones :
+For more flexibility, around hooks are inherited but not repeated. Consider three zones:
 
 \begin{tabular}{|l|l|l|l|}
 \hline
