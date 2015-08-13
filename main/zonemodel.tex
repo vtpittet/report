@@ -13,12 +13,12 @@ As illustrated in figure \ref{fig:zpn}, the Zone can be understood as an extensi
 
 \begin{figure}
   \centering
-  \includegraphics[width=\textwidth]{zone-pn}
+  \includegraphics[width=\textwidth]{zone-pn-new}
   \caption{Zone on Petri net}
   \label{fig:zpn}
 \end{figure}
 
-More formally, given a Petri net $PN = (P, T, F)$ with $P$ the set of places, $T$ the set of transitions and $F$ the set of flows from $P$ to $T$ or $T$ to $P$: $F \subseteq (P \times T) \cup (T \times P)$, a Zone $Z$ is a subset $Z \subseteq P$ such that
+More formally, given a Petri net $PN = (P, T, F)$ with $P$ the set of places, $T$ the set of transitions and $F$ the set of flows from $P$ to $T$ or $T$ to $P$: $F \subseteq (P \times T) \cup (T \times P)$, a Zone $Z$ is a subset $Z \subseteq P$ such that:
 
 $$\forall Z_1, Z_2 \exists Z_0 \text{ s.t. } Z_1 \subseteq Z_0 \land Z_2 \subseteq Z_0 $$
 
@@ -37,7 +37,7 @@ The key-value bindings defined by the Zone are accessible from any place inside 
 
 The Zone identifies a crossing event when a token of the Petri net moves between two places that do not belong to the same Zones (see crossing algorithm in section \ref{sec:cross-res}). For more liberty in the crossing hooks, tokens may carry nothing (void tokens) an error (error tokens) or the result of a zoned task (result tokens). In Java, the tokens are implemented as simple objects containing a result, an error value or nothing.
 
-In order to know which Zone originated a token, they are wrapped as zoned tokens. A zoned token is simply a tuple containing a Token and its source Zone.
+In order to know which Zone originated a token, they are wrapped as zoned tokens. A zoned token is simply a tuple containing a token and its source Zone.
 
 Operations on token while crossing Zone boundaries are described by the Zone's crossing hooks.
 The presence of around hooks defined in the Zone allows even more capabilities. However, unlike the crossing hooks, these around hooks are closer to an implementation feature than a primary effect of the model.
@@ -47,11 +47,11 @@ The presence of around hooks defined in the Zone allows even more capabilities. 
 In order to ease further discussion and presentation of the Zone, this section gives a small glossary of the essential terms used in the Zone.
 
 
-\paragraph{Task} represents the very general concept of ``something the program has to do''. More formally, a task is a procedure with some input and zero or one output. For example, \lstinline{Runnable} is a task with no input, no output. A method call is a task with method's arguments as input and method's return value as output.
+\textbf{Task} represents the very general concept of ``something the program has to do''. More formally, a task is a procedure with some input and zero or one output. For example, \lstinline{Runnable} is a task with no input, no output. A method call is a task with method's arguments as input and method's return value as output.
 
-\paragraph{Zoned Token} is a tuple containing a token with its origin Zone. Zoned tokens are used as input to the cross resolution algorithm (see cross resolution section).
+\textbf{Zoned Token} is a tuple containing a token with its origin Zone. Zoned tokens are used as input to the crossing resolution algorithm (see section \ref{sec:cross-res}).
 
-\paragraph{Zoned Task} is the result of binding a task to a Zone. A Zoned task behaves like a task but accepts and return only zoned tokens. For instance a task expressed in Java by
+\textbf{Zoned Task} is the result of binding a task to a Zone. A Zoned task behaves like a task but accepts and return only zoned tokens. For instance a task expressed in Java by
 \begin{lstlisting}
 Function<T, U> task;
 \end{lstlisting}
@@ -60,7 +60,7 @@ Is associated to a zoned task represented by
 Function<ZonedToken<T>, ZonedToken<U>> zonedTask;
 \end{lstlisting}
 
-\paragraph{Zone Stack} is the stack of all enclosing zones at a given point of the program execution. Innermost Zone is considered to be at the top of the Zone Stack. If no Zone is defined, the current Zone is considered to be the default root Zone. For example :
+\textbf{Zone Stack} is the stack of all enclosing zones at a given point of the program execution. Innermost Zone is considered to be at the top of the Zone Stack. If no Zone is defined, the current Zone is considered to be the default root Zone. For example :
 
 \begin{lstlisting}
 (new ZoneA()).run(() -> {
@@ -86,7 +86,7 @@ Function<ZonedToken<T>, ZonedToken<U>> zonedTask;
 
 The crossing principle is the original feature of the Zone. The base mechanism is simple. Value outputted by zoned tasks are \emph{zoned tokens}. When the value of a zoned token is used, it is extracted out of the zoned token to the current Zone, triggering the crossed Zones crossing hook.
 
-Multiple cases can occur with the crossing mechanism. Especially in the Java implementation, where it is possible to keep and carry around references to already bound tasks, a token extraction can arise in unexpected contexts. Rather than relying on visibility restrictions to prevent such unusual cases to occur, the cross resolution properly defines how the model behaves under such circumstances.
+Multiple cases can occur with the crossing mechanism. Especially in the Java implementation, where it is possible to keep and carry around references to already bound tasks, a token extraction can arise in unexpected contexts. Rather than relying on visibility restrictions to prevent such unusual cases to occur, the crossing resolution properly defines how the model behaves under such circumstances.
 
 For better understanding, keep in mind that at the bottom of every single Zone stack, there is the Root Zone. The Root Zone can be seen as the Zone with no hooks and values enclosing the whole program.
 
@@ -104,7 +104,7 @@ assert(zone1.getParent() == ROOT_ZONE);
 assert(zone2.getParent() == zone1);
 \end{lstlisting}
 
-The cross resolution algorithm always receives three parameters :
+The crossing resolution algorithm always receives three parameters :
 
 \begin{enumerate}
 \item The source Zone
@@ -112,7 +112,7 @@ The cross resolution algorithm always receives three parameters :
 \item The crossing Token
 \end{enumerate}
 
-The crossing token is \emph{not} a zoned token. The zoned tokens used by the framework provide the source Zone of the cross resolution algorithm and the crossing token. The destination Zone is the current Zone of the extraction.
+The crossing token is \emph{not} a zoned token. The zoned tokens used by the framework provide the source Zone of the crossing resolution algorithm and the crossing token. The destination Zone is the current Zone of the extraction.
 
 The crossing algorithm is divided in four steps:
 \begin{enumerate}
@@ -122,7 +122,7 @@ The crossing algorithm is divided in four steps:
 \item Cross-in the rest of the destination stack in down-top order with the crossing token.
 \end{enumerate}
 
-Let's see some concrete example of crossing executions.
+Let's see some concrete example of crossing resolutions.
 
 \subsection*{Base case}
 
@@ -152,7 +152,7 @@ When the code zoned in new Zone starts, the cross algorithm executes in a very s
 \\ \hline
 \textbf{Source Zone Stack} & Some Zone :: ROOT\_ZONE
 \\ \hline
-\textbf{Destination Zone Stack } & New Zone :: Some Zone :: ROOT\_ZONE
+\textbf{Destination Zone Stack} & New Zone :: Some Zone :: ROOT\_ZONE
 \\ \hline
 \textbf{Common Part} & Some Zone :: ROOT\_ZONE
 \\ \hline
@@ -160,7 +160,7 @@ When the code zoned in new Zone starts, the cross algorithm executes in a very s
 \\ \hline
 \textbf{Pruned Source Stack} & $\emptyset$
 \\ \hline
-\textbf{Pruned Destination } & New Zone
+\textbf{Pruned Destination} & New Zone
 \\ \hline
 \end{tabular}
 
@@ -180,7 +180,7 @@ When the code zoned in new Zone ends, the cross algorithm executes in the dual c
 \\ \hline
 \textbf{Source Zone Stack} &  New Zone :: Some Zone :: ROOT\_ZONE
 \\ \hline
-\textbf{Destination Zone Stack } & Some Zone :: ROOT\_ZONE
+\textbf{Destination Zone Stack} & Some Zone :: ROOT\_ZONE
 \\ \hline
 \textbf{Common Part} & Some Zone :: ROOT\_ZONE
 \\ \hline
@@ -188,15 +188,15 @@ When the code zoned in new Zone ends, the cross algorithm executes in the dual c
 \\ \hline
 \textbf{Pruned Source Stack} & New Zone
 \\ \hline
-\textbf{Pruned Destination } & $\emptyset$
+\textbf{Pruned Destination} & $\emptyset$
 \\ \hline
 \end{tabular}
 
-The join Zone is still the source Zone, but the left destination stack is emptied by step 2. Step 3 executes one cross out (from the source Zone), step 4 executes no cross-in. To summarize, in this case, a cross in is executed when entering the new Zone, a cross out is executed when entering the old Zone. So far, so good.
+The join Zone remains the source Zone, but the left destination stack is emptied by step 2. Step 3 executes one cross out (from the source Zone), step 4 executes no cross-in. To summarize, in this case, a cross in is executed when entering the new Zone, a cross out is executed when entering the old Zone. So far, so good.
 
 \subsection*{Running in parent Zone from child Zone}
 
-This is a simple case that allows to see that starting code execution in a Zone does not necessarily implies crossing in.
+This case allows to see that starting code execution in a Zone does not necessarily implies crossing in.
 
 \begin{lstlisting}
 // keeps reference to parent Zone
@@ -216,7 +216,7 @@ parent.run(() -> {
 });
 \end{lstlisting}
 
-When the code zoned in parent (at the point of interest) starts, the cross algorithm executes with the opposite configuration as the base case:
+When the code zoned in parent (at the point of interest) starts, the cross algorithm executes with the opposite configuration of the base case:
 
 \begin{tabular}{| l | l |}
 \hline
@@ -253,7 +253,7 @@ This last example shows how, in one single crossing resolution, can both cross-i
 });
 \end{lstlisting}
 
-In this case, \lstinline{child1} and \lstinline{child2} share the same parent but neither is parent of the other one. Hence, when the code zoned in \lstinline{child2} (at the point of interest) starts, the cross resolution algorithm gets following configuration:
+In this case, \lstinline{child1} and \lstinline{child2} share the same parent but neither is parent of the other one. Hence, when the code zoned in \lstinline{child2} (at the point of interest) starts, the crossing resolution algorithm gets following configuration:
 
 \begin{tabular}{| l | l |}
 \hline
@@ -262,6 +262,20 @@ In this case, \lstinline{child1} and \lstinline{child2} share the same parent bu
 \textbf{Destination Zone} & Child 2 Zone
 \\ \hline
 \textbf{Join Zone} & Parent Zone
+\\ \hline
+\multicolumn{2}{l}{}
+\\ \hline
+\textbf{Source Zone Stack} & Child 1 :: Parent Zone :: ROOT\_ZONE
+\\ \hline
+\textbf{Destination Zone Stack} & Child 2 :: Parent Zone :: ROOT\_ZONE
+\\ \hline
+\textbf{Common Part} & Parent Zone :: ROOT\_ZONE
+\\ \hline
+\multicolumn{2}{l}{}
+\\ \hline
+\textbf{Pruned Source Stack} & Child 1
+\\ \hline
+\textbf{Pruned Destination} & Child 2
 \\ \hline
 \end{tabular}
 
@@ -275,7 +289,7 @@ A zoned task has contextual access to the current Zone. At any point of its exec
 
 The context of a zoned task persists asynchronously. If an asynchronous task is started from a Zone, it must keep contextual access to that Zone.
 
-Every element crossing a Zone boundary triggers its \emph{crossing hooks} (discussed in Cross Resolution section).
+Every element crossing a Zone boundary triggers its \emph{crossing hooks} (as discussed in section \ref{sec:cross-res}).
 
 Code executed inside the Zone is intercepted and passed to its \emph{internal hooks}. The code that executes inside a Zone can be manipulated by the Zone itself, according to its hooks specification. Here is an illustration of an internal Zone execution:
 
@@ -313,17 +327,17 @@ myZone.run(() -> {
 
 The internal binding and execution of a task follow six steps:
 \begin{enumerate}
-\item Task is bound to the Zone, run hooks are applied.
+\item Task is bound to the Zone, internal hooks are applied.
 \item The current Zone reference is updated to the Zone of execution.
-\item An empty token crosses to the Zone of execution (Cross Resolution applied).
+\item An empty token crosses to the Zone of execution (crossing resolution applied).
 \item The task, hooked by the Zone, executes.
 \item The current Zone reference is updated to the initial Zone (before task execution).
-\item The result token crosses to the initial Zone (Cross Resolution applied).
+\item The result token crosses to the initial Zone (crossing resolution applied).
 \end{enumerate}
 
 \subsection*{Asynchronous Binding}
 
-The asynchronous binding and execution is quite different from the internal one. Unlike internally bound task, asynchronous task does not automatically trigger crossing operation. In fact, it is not possible a-priori to know when the task will be executed, from which context will come its input (if the task depends on the execution of another task) neither in which context will be used its output (if another task depends on the execution of this task). This summarizes to the following two points:
+The asynchronous binding and execution is quite different from the internal one. Unlike internally bound task, asynchronous task does not automatically trigger crossing operation. In fact, it is not possible to know a priori when the task will be executed, from which context will come its input (if the task depends on the execution of another task) neither in which context will be used its output (if another task depends on the execution of this task). This summarizes to the following two points:
 \begin{enumerate}
 \item An asynchronously zoned task input may come from another Zone (hence causing crossing hook operations)
 \item An asynchronously zoned task output may be used in another Zone (hence causing crossing hook operations)
@@ -347,7 +361,7 @@ For comparison with internal binding, asynchronous binding and execution of a ta
 \item All inputs cross to the Zone of execution (crossing resolution applied once per input).
 \item The task, previously modified by the Zone's asynchronous hook, executes.
 \item The current Zone reference is updated to the initial Zone.
-\item The result is returned in a zoned token, bound to the emitting Zone. The crossing resolution is not applied immediately but later, each time the zoned result gets used.
+\item The result is returned in a zoned token, bound to the emitting Zone. The crossing resolution is not applied immediately but later, each time the zoned result gets extracted.
 
 \end{enumerate}
 
@@ -369,11 +383,11 @@ public <T> Token<T> crossIn(Token<T>);
 public <T> Token<T> crossOut(Token<T>);
 \end{lstlisting}
 
-Hence, the crossing hooks can inspect the token, make computations and return a \emph{new} token with updated value. It is required that tokens are immutable. The reason is that the same zoned token may be used multiple times. If multiple tasks depend on the same asynchronous execution (hence having multiple callbacks for one method), its resulting token will be used once per dependency. Then it is crucial to always use the same unmodified token, not mentioning the risk of race conditions, if two concurrent crossing hooks run with the same zoned Token.
+Hence, the crossing hooks can inspect the token, make computations and return a \emph{new} token with updated value. It is required that tokens are immutable. The reason is that the same zoned token may be used multiple times. If multiple tasks depend on the same asynchronous execution (hence having multiple callbacks for one method), its resulting token will be used once per dependency. Then it is crucial to always use the same unmodified token, not mentioning the risk of race conditions, if two concurrent crossing hooks run with the same zoned token.
 
 \subsection*{Around Hooks}
 
-Around hook discussion distinguished the internal hooks and asynchronous hooks, but both make the same task. Only their application points differ. That is why they are not distinguished here and aggregated under the term of ``around hook''.
+Around hook discussion distinguished the internal hooks and asynchronous hooks, but both make the same task. Only their application locations differ. That is why they are not distinguished here and aggregated as ``around hook''.
 
 Around hooks are represented as function from zoned task to zoned task. Again, for simplicity, other code examples do not show the generic type parameters.
 
@@ -388,7 +402,7 @@ This gives the opportunity to surround hooked task with a try-catch block, offer
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=0.7\textwidth]{around-hook}
+  \includegraphics[width=\textwidth]{around-hook}
   \caption{Around hook}
   \label{fig:around-hook}
 \end{figure}
@@ -403,22 +417,22 @@ For more flexibility, around hooks are inherited but not repeated. Consider thre
 \\\hline
 outer Zone & None & $f$: Task $\rightarrow$ Task & $f$
 \\\hline
-middle Zone & outerZone & $g$: Task $\rightarrow$ Task & $f \circ g$
+middle Zone & outer Zone & $g$: Task $\rightarrow$ Task & $f \circ g$
 \\\hline
-inner Zone & middleZone & $f$: Task $\rightarrow$ Task & $f \circ g$
+inner Zone & middle Zone & $f$: Task $\rightarrow$ Task & $f \circ g$
 \\\hline
 \end{tabular}
 
-In inner Zone, $f$ hook does not get applied one more time, because it would repeat inherited f hook from outer Zone. When the same hook is inherited multiple times, the outermost origin determines its application position. In the previous example, inner Zone applies $( f \circ g )$ and not $( g \circ f )$ because the outermost origin of $f$ (outer Zone) encloses the outermost origin of $g$ (middle Zone). This prevents inner Zones from accidentally modifying inherited hooks application order.
+In inner Zone, $f$ hook does not get applied twice, because it would repeat inherited f hook from outer Zone. When the same hook is inherited multiple times, the outermost origin determines its application position. In the previous example, inner Zone applies $( f \circ g )$ and not $( g \circ f )$ because the outermost origin of $f$ (outer Zone) encloses the outermost origin of $g$ (middle Zone). This prevents inner Zones from accidentally modifying inherited hooks application order.
 
-This inheritance policy is simply more general than a blind straight-forward application of all hooks. It is easy (especially in Java) to re-create a different instance of a hook with the same functionality to prevent it from being filtered out. On the other hand, given a single function composed of many hooks, it is hard, if not impossible, to filter out repetitions to get such union-inheritance.
+This inheritance policy is more general than a blind straight-forward application of all hooks. It is easy (especially in Java) to re-create a different instance of a hook with the same functionality to prevent it from being filtered out. On the other hand, given a single function composed of many hooks, it is hard, if not impossible, to filter out repetitions to get such union-inheritance.
 
 \section{Realization}
 \label{sec:realization}
 
 The hypothesis that any submitted asynchronous code can be hooked permits to safely ignore the Zone integration when discussing its functionalities. The integration will be always possible. This is a great benefit, since it effectively decouples the Zone functional specification from its integration concerns, confronted to the multitude of evolving asynchronous frameworks in Java.
 
-To integrate a Zone in a program, one can see it as a generalization of a Java thread local\footnote{A Java thread local is a field that is unique for each thread}. Note that the concept of thread local is not limited to Java. A mapping from threads to stored values easily implements a thread local behavior.
+To integrate a Zone in a program, one can see it as a generalization of a Java thread local\footnote{A Java thread local variable has an independently initialized copy unique for each thread}. Note that the concept of thread local is not limited to Java. A mapping from threads to stored values implements the same behavior.
 
 When using a thread pool, the concept of thread local becomes mitigated, even erroneous. Thread locals are bound to a specific thread, but the user does not controls how its tasks are bound to the threads. The common pattern to solve this is to wrap submitted code with instructions that update the thread local for the code.
 \begin{lstlisting}
@@ -447,7 +461,7 @@ public void submitWithLocal(Runnable code, T local) {
 }
 \end{lstlisting}
 
-The Zone is a generalization of this method. Rather than binding a runnable, any code is accepted, denoted as \emph{task}. The Zone handles internally the thread local to store itself and simply exports a bind method.
+The Zone is a generalization of this method. Rather than binding a runnable, any code is accepted, denoted as \emph{task}. The Zone handles internally the thread local to store its reference and simply exports a \lstinline{bind} method.
 The Zone takes advantage of this binding operation to apply its internal mechanics and all defined submission hooks. Based on this single binding, it provides:
 \begin{itemize}
 \item Asynchronous persistent context.

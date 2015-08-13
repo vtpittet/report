@@ -12,7 +12,7 @@
 
 My work specifically targets the asynchronous world. Hence, I will start with a little tour of the most common asynchronous execution frameworks. Clearly, this vision is axed toward the Java programming language, but this is adapted for the current work, proposing a Java solution.
 
-There is nothing to be done before a clarification of what I mean by ``asynchronous''. As many other buzz-words (see ``reactive'' for example), ``asynchronous'' is used in variety of contexts for different meanings. Often, it describes a method call on a dedicated asynchronous API, with potential callback code that gets executed after completion. This is the dominant approach in JavaScript.
+There is nothing to be done before a clarification of what I mean by ``asynchronous''. As many other buzz-words (see ``reactive'' for example), ``asynchronous'' is used in variety of situations for different meanings. Often, it describes a method call on a dedicated asynchronous API, with potential callback code that gets executed after completion. %This is the dominant approach of JavaScript.
 
 Here, it describes more generally any code that does not run \emph{in sequence} of the code that submitted it. It may run later if there is only one execution unit (single-threaded). It may run in parallel or later, if there is two or more execution unit (multi-threaded).
 
@@ -62,7 +62,7 @@ Let's take a deeper look on the different approaches I analyzed before designing
 
 In nowadays machines, threads are the basic unit of asynchronous execution. They are a very good tool, since they allow automatic time slicing via preemptive scheduling. This make them suitable for operative system, since no executed program has to be aware of interruptions, at the cost of context switching overhead.
 
-The Java language ports this functionality to the programmer through its threads. However, the virtual machine does not allow context switching between those threads. Actually, the operating system supporting the Java threads transparently undertakes this role. Since one Java thread cannot be interrupted to change the task it is running (i.e. accomplish a context-switch), using Java's native threads is limited to one task per thread. Running a new task means instantiating and garbage-collecting a whole new thread.
+The Java virtual machine ports this functionality to the programmer through its threads. However, the virtual machine does not allow context switching between those threads. Actually, the operating system supporting the Java threads transparently undertakes this role. Since one Java thread cannot be interrupted to change the task it is running (i.e. accomplish a context-switch), using Java's native threads is limited to one task per thread. Running a new task means instantiating and garbage-collecting a whole new thread.
 
 \section{Thread Pools}
 
@@ -70,16 +70,16 @@ The high cost of allocating and collecting a Java thread is not affordable to re
 
 In fact, there is an analogy between the single thread approach, relying on operating system scheduling and the thread pool. The thread pool acts as a non-preemptive scheduler for the Java virtual machine, and the pooled threads are its processes.
 
-Thread pools bring huge speedup, avoiding costly thread instantiation, but loose the preemptive scheduling, with the risk of task starvation.
+Thread pools bring notable speedup, avoiding costly thread instantiation, but loose the preemptive scheduling, with the risk of task starvation.
 And final consequence: one-to-one pairing between executed tasks and threads is lost. Threads become blind workers, with no control on the tasks they execute.
 
 \section{Callbacks}
 
 Callbacks are always associated with an asynchronous method. Usually, a callback is a piece of code (function pointer, anonymous class, lambda) taking as argument the output of its associated asynchronous method. The callback is not an asynchronous execution framework itself, but a way to append code to the asynchronous method. However, the callback still \emph{declares} asynchronous code. Indeed, the callback code is submitted on method call and executed after the asynchronous method has returned. Note that the callback is not necessarily executed in sequence of its associated method. It can be asynchronous relative to that method too.
 
-Callbacks are not mutually exclusive with thread pools. On the contrary, asynchronous methods and callbacks are points in the program where the execution service can safely switch between different programs. You may have noticed the similarity with a program yielding the processor in a non-preemptive scheduler. Using asynchronous methods and callbacks breaks a task into smaller pieces indicating to the scheduler where it can safely pause an execution to undertake another sub-task. In this context, asynchronous methods typically allow to pause the execution of a blocking call, for full benefit. This explains why callback use is so important in JavaScript. Its non-preemptive single threaded executor needs many point to switch tasks and to archive effective parallelism.
+Callbacks are not mutually exclusive with thread pools. On the contrary, asynchronous methods and callbacks are positions in the program where the execution service can safely switch between different programs. You may have noticed the similarity with a program yielding the processor in a non-preemptive scheduler. Using asynchronous methods and callbacks breaks a task into smaller pieces indicating to the scheduler where it can safely pause an execution to undertake another sub-task. In this context, asynchronous methods typically allow to pause the execution of a blocking call, for full benefit. This explains why callback use is so important in JavaScript. Its non-preemptive single threaded executor needs many point to switch tasks and to archive effective parallelism.
 
-The callback approach is less seen in Java, but is central in Dart and JavaScript. Recently, the popular \vertx\ framework successfully used this pattern on the Java virtual machine and illustrates how well the callbacks works with thread pools. Its API presents asynchronous methods with callbacks, but under the hood, relies on thread pools to get asynchrony.
+The callback approach is less seen in Java, but is central in Dart and JavaScript. Recently, the popular \vertx\footnote{\vertx\ is a lightweight event-driven and non-blocking framework to build concurrent applications.} framework successfully used this pattern on the Java virtual machine and illustrates how well the callbacks works with thread pools. Its API presents asynchronous methods with callbacks, but under the hood, relies on thread pools to get asynchrony.
 
 % Interestingly, it has been shown (INSERT REFERENCE) that 
 % The quasar framework for Java exploits this and propose an alternative to the thread pool to avoid cost of 
@@ -95,6 +95,6 @@ Called \lstinline{CompletableFuture} in Java, they are present since Java 8 in t
 
 \section{Observers}
 
-Speaking of Java and asynchronous programming, one cannot avoid the observer pattern. At the risk of oversimplifying the reality, I regroup in this category frameworks as Swing, based on observers or handlers and Akka\footnote{Akka is a complete actor pattern implemented in Scala.} or \vertx\ (again) who use the concept of actor, respectively verticle. Basically, an actor is an intelligent observer designed to have more control on the message it receives and to send messages to other actors. Regarding the asynchronous behavior, observers and actor do the same. They differ in term of concurrency control, but this is not the focus of this work.
+Speaking of Java and asynchronous programming, one cannot avoid the observer pattern. At the risk of oversimplifying the reality, I regroup in this category frameworks as Swing, based on observers or handlers and Akka\footnote{Akka is a toolkit and runtime for building highly concurrent, distributed, and resilient message-driven applications on the JVM.} or \vertx\ (again) who use the concept of actor, respectively verticle. Basically, an actor is an intelligent observer designed to have more control on the message it receives and to send messages to other actors. Regarding the asynchronous behavior, observers and actor do the same. They differ in term of concurrency control, but this is not the focus of this work.
 
 Since observers get submitted, hold code executed later, they are also a valid case of an asynchronous code.
