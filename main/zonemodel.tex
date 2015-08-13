@@ -138,7 +138,10 @@ The common case of zoned execution is running code in a child Zone.
 });
 \end{lstlisting}
 
-When the code zoned in new Zone starts, the cross algorithm executes in a very simple configuration.
+%\newpage
+
+
+When the code bound to ``new Zone'' starts, the crossing resolution algorithm executes with a very simple configuration, as described below.
 
 \begin{tabular}{| l | l |}
 \hline
@@ -192,7 +195,7 @@ When the code zoned in new Zone ends, the cross algorithm executes in the dual c
 \\ \hline
 \end{tabular}
 
-The join Zone remains the source Zone, but the left destination stack is emptied by step 2. Step 3 executes one cross out (from the source Zone), step 4 executes no cross-in. To summarize, in this case, a cross in is executed when entering the new Zone, a cross out is executed when entering the old Zone. So far, so good.
+The join Zone remains the source Zone, but the left destination stack is emptied by step 2. Step 3 executes one cross out (from the source Zone), step 4 executes no cross-in. To summarize this case, a cross-in is executed when entering the new Zone, a cross-out is executed when entering the old Zone. So far, so good.
 
 \subsection*{Running in parent Zone from child Zone}
 
@@ -285,7 +288,7 @@ Unlike previous cases, the join Zone is neither the source nor the destination Z
 
 This section presents how Zones and tasks interact. Specifically, what makes a task \emph{zoned} and how to bind a task to a Zone.
 
-A zoned task has contextual access to the current Zone. At any point of its execution in a Zone, a task must be able to refer to that Zone. This reference gives access to the Zone local values.
+A zoned task has contextual access to the current Zone. At any point of its execution in a Zone, a task must be able to refer to that Zone. This reference gives access to the values of the local Zones.
 
 The context of a zoned task persists asynchronously. If an asynchronous task is started from a Zone, it must keep contextual access to that Zone.
 
@@ -304,7 +307,7 @@ myZone.run(() -> {
 \end{lstlisting}
 
 In the same way internal execution is hooked, asynchronous submission in a zoned task is intercepted by the Zone.
-Asynchronous submission inside a Zone can be manipulated by the Zone itself, according to its hooks content. This typically occur in this pattern:
+Asynchronous submission inside a Zone can be manipulated by the Zone itself, according to its hooks content. This typically occurs in this code pattern:
 
 \begin{lstlisting}
 Zone myZone = ...
@@ -338,18 +341,18 @@ The internal binding and execution of a task follow six steps:
 \subsection*{Asynchronous Binding}
 
 The asynchronous binding and execution is quite different from the internal one. Unlike internally bound task, asynchronous task does not automatically trigger crossing operation. In fact, it is not possible to know a priori when the task will be executed, from which context will come its input (if the task depends on the execution of another task) neither in which context will be used its output (if another task depends on the execution of this task). This summarizes to the following two points:
-\begin{enumerate}
-\item An asynchronously zoned task input may come from another Zone (hence causing crossing hook operations)
-\item An asynchronously zoned task output may be used in another Zone (hence causing crossing hook operations)
-\end{enumerate}
+\begin{itemize}
+\item An asynchronously zoned task \emph{input} may \emph{come} from another Zone (hence causing crossing hook operations)
+\item An asynchronously zoned task \emph{output} may \emph{be used in} another Zone (hence causing crossing hook operations)
+\end{itemize}
 
 Since the crossing resolution is done on use-site, it takes into account its specific execution context:
-\begin{enumerate}
+\begin{itemize}
 \item An input coming from the same Zone does not trigger any cross operation.
 \item An input coming from a parent Zone crosses inside the child Zone.
 \item An input coming from a child Zone crosses outside the parent Zone.
 \item An input coming from a sibling Zone (same parent) crosses outside the sibling Zone (towards the common parent Zone), then crosses inside the target Zone.
-\end{enumerate}
+\end{itemize}
 
 This implements the intuition that a Zone encloses everything happening inside it and the cross operations are triggered if and only if something enters or exits the Zone.
 For comparison with internal binding, asynchronous binding and execution of a task follow 6 steps:
@@ -423,18 +426,18 @@ inner Zone & middle Zone & $f$: Task $\rightarrow$ Task & $f \circ g$
 \\\hline
 \end{tabular}
 
-In inner Zone, $f$ hook does not get applied twice, because it would repeat inherited f hook from outer Zone. When the same hook is inherited multiple times, the outermost origin determines its application position. In the previous example, inner Zone applies $( f \circ g )$ and not $( g \circ f )$ because the outermost origin of $f$ (outer Zone) encloses the outermost origin of $g$ (middle Zone). This prevents inner Zones from accidentally modifying inherited hooks application order.
+In inner Zone, $f$ hook does not get applied twice because it would repeat inherited f hook from outer Zone. When the same hook is inherited multiple times, the outermost origin determines the application order. In the previous example, inner Zone applies $( f \circ g )$ and not $( g \circ f )$ because the outermost origin of $f$ (outer Zone) encloses the outermost origin of $g$ (middle Zone). This prevents inner Zones from accidentally modifying inherited hooks application order.
 
 This inheritance policy is more general than a blind straight-forward application of all hooks. It is easy (especially in Java) to re-create a different instance of a hook with the same functionality to prevent it from being filtered out. On the other hand, given a single function composed of many hooks, it is hard, if not impossible, to filter out repetitions to get such union-inheritance.
 
 \section{Realization}
 \label{sec:realization}
 
-The hypothesis that any submitted asynchronous code can be hooked permits to safely ignore the Zone integration when discussing its functionalities. The integration will be always possible. This is a great benefit, since it effectively decouples the Zone functional specification from its integration concerns, confronted to the multitude of evolving asynchronous frameworks in Java.
+The hypothesis that any submitted asynchronous code can be hooked permits to safely ignore the Zone integration when discussing its functionalities. The integration will be always possible. This is a great benefit, since it effectively decouples the Zone functional specification from its integration concerns. The implementation is not depending on the multitude of evolving asynchronous frameworks in Java, as mentionned in chapter \ref{ch:asyncworld}.
 
-To integrate a Zone in a program, one can see it as a generalization of a Java thread local\footnote{A Java thread local variable has an independently initialized copy unique for each thread}. Note that the concept of thread local is not limited to Java. A mapping from threads to stored values implements the same behavior.
+To integrate a Zone in a program, one can see it as a generalization of a Java thread local\footnote{A Java thread local variable has an independently initialized unique copy for each thread}. Note that the concept of thread local is not limited to Java. A mapping from threads to stored values implements the same behavior.
 
-When using a thread pool, the concept of thread local becomes mitigated, even erroneous. Thread locals are bound to a specific thread, but the user does not controls how its tasks are bound to the threads. The common pattern to solve this is to wrap submitted code with instructions that update the thread local for the code.
+When using a thread pool, the concept of thread local becomes mitigated, even erroneous. Thread locals are bound to a specific thread, but the user does not controls how its tasks are bound to the threads. The common procedure to solve this is to wrap submitted code with instructions that update the thread local for the code.
 \begin{lstlisting}
 
 ThreadLocal<T> threadLocal = ...
@@ -462,7 +465,7 @@ public void submitWithLocal(Runnable code, T local) {
 \end{lstlisting}
 
 The Zone is a generalization of this method. Rather than binding a runnable, any code is accepted, denoted as \emph{task}. The Zone handles internally the thread local to store its reference and simply exports a \lstinline{bind} method.
-The Zone takes advantage of this binding operation to apply its internal mechanics and all defined submission hooks. Based on this single binding, it provides:
+The Zone takes advantage of this binding operation to apply its internal mechanics and all defined around hooks. Based on this single binding, it provides:
 \begin{itemize}
 \item Asynchronous persistent context.
 \item Modeled execution flow between the Zones.

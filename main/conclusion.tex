@@ -2,7 +2,7 @@
 \chapter{Conclusion}
 \label{ch:conclusion}
 
-We have seen that the Zone for Java brings you innovative building tools. The integration work may be a little complex (as showed the \vertx\ case study), but once this is correctly done, one can almost transparently rely on the Zone as a uniform execution context. In summary, the Zone needs:
+We have seen that the Zone for Java brings innovative building tools. The integration work may be complex (as showed the \vertx\ case study), but once this is correctly done, one can almost transparently rely on the Zone as a uniform execution context. In summary, the Zone needs:
 \begin{itemize}
 \item Explicit binding to asynchronous tasks submitted to the framework.
 \end{itemize}
@@ -20,25 +20,25 @@ In return, it brings:
 \item Extensible and reusable structure.
 \end{itemize}
 
-To close this work, I'll show three ways of research and development on the Zone and a small analysis of how the original problematic changed through the research.
+To close this work, I'll show three ways of research and development on the Zone and a short analysis of how the original problematic changed through the research.
 
 \section{Development}
 
 Bringing more and easier binding primitives would be very interesting. Even though the binding principle is detailed, its implementation is still not general. This is mainly due to the large amount of standard interfaces present in the \lstinline{java.util.function} package that match to the Zone's task abstraction. Actually, the Zone only handles \lstinline{BiFunction} and requires additional wrap-steps to bind another interface, as \lstinline{Runnable} for example.
 
-When using and probing the Zone, I often encountered the need to ignore parts of the Zone stack, or even to reorder the stack. Reordering would be useful to ensure some hook is always applied in first position. The union-inheritance is the solution I used to gain the required flexibility. However, nothing proves this is the only solution. 
+When using and probing the Zone, I often encountered the need to ignore parts of the Zone stack, or even to reorder it. Reordering would be useful to ensure some hook is always applied in first position. The union-inheritance is the solution I used to gain the required flexibility. However, nothing proves this is the only solution. 
 
-The scope projection is one solution to theorize and specify the Zone stack manipulation. It consists in using a predicate on the Zone to filter the Zone stack, allowing to project the Zone context to another with only the properties of accepted Zones. One concrete use is to deduce a new context, based on the current one. This grants an easy way to keep some useful information and drop the data we don't use any more.
+The scope projection is one solution to theorize and specify the Zone stack manipulation. It consists in using a predicate on the Zone to filter the Zone stack, allowing to transform the Zone context in another one with only the properties of accepted Zones. One concrete use is to deduce a new context, based on the current one. This grants an easy way to keep some useful information and drop the data we don't use any more.
 
 \section{Theory}
 
-The representation on Petri nets is useful for understanding but not totally formalized. A strict theorizing will allow to relate, compare and even associate the Zone to existing Petri nets extensions. For example, colored Petri nets which store data inside its toke shares this particularity with the Zone. If such association exists, the Zone could benefit of existing results and asynchronous theorems, hence increasing its stability and the understanding we have of the Zone.
+The representation on Petri nets is useful for understanding but not totally formalized. A strict theorizing will allow to relate, compare and even associate the Zone to existing Petri nets extensions. For example, the colored Petri nets have the ability to store data inside its token, as the Zone does with input and return values in zoned tokens. If such association exists, the Zone could benefit of existing results and asynchronous theorems, hence increasing its stability and the understanding we have of the Zone.
 
 \section{Practice}
 
 The zone stays a complex abstraction, especially realizing an integration on an execution framework is hard. A good improvement is to collect experience data and compile it as a best practices guide or a trouble shooting documentation. This can even lead to reworking some aspects of the model that would appear unsound.
 
-An additional performance analysis will help to understand the cost of using the Zone. Indeed, it currently adds a lot of wrapping overhead. Knowing that overhead and bottlenecks of the framework opens the door to efficient optimization and determines if it suits to a production environment.
+An additional performance analysis will help to understand the cost of using the Zone. Indeed, it currently adds a lot of wrapping overhead. Knowing this overhead and the bottlenecks of the framework opens the door to efficient optimization and determines if it suits to a production environment.
 
 
 
@@ -48,4 +48,4 @@ It was interesting to see how the central problematic evolved in the course of t
 
 Trying to answer that question, I found out that the real need is a \emph{uniform execution principle}, constant in both synchronous and asynchronous transitions. This gave birth to the crossing principle that I successfully used to implement specialized abilities on the Zone.
 
-With these words, we can conclude that the real need to correctly deal with the asynchronous programming is not an overpowered framework with lots of features and incredible refinement to distinguish addressed cases. The real point is to find a simple representation to think about synchronous and asynchronous executions in a \emph{uniform} way.
+With these words, we can conclude that the real need to correctly deal with the asynchronous programming is not an overpowered framework with lots of features and an incredible refinement to distinguish addressed cases. The real point is to find a simple representation to think about synchronous and asynchronous executions in a \emph{uniform way}.
